@@ -100,7 +100,7 @@ export default function Sequencer({ initGain }) {
             RESCHEDULE
           </Button>
         </div>
-        <div style={{ maxWidth: '200px' }}>
+        <div style={{ width: '100%', maxWidth: '360px' }}>
           <VolumeSlider
             initGain={0.5}
             gainNode={masterGainNode}
@@ -120,14 +120,14 @@ export default function Sequencer({ initGain }) {
                       style={{
                         width: `${schedule.synths[index].pattern[
                           metro % stepCount
-                        ].frequency / 10}px`,
+                        ].frequency / 12}px`,
                         height: '5px',
                         borderRadius: '5px',
                         background: `#${Math.floor(
                           Math.random() * 16777216
                         ).toString(16)}`,
                         position: 'absolute',
-                        top: `${30 + index * 10}px`,
+                        top: `${30 + index * 12}px`,
                       }}
                     />
                   </>

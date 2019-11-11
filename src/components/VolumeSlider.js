@@ -43,7 +43,7 @@ export default function ContinuousSlider({
   };
 
   return (
-    <Card style={{ marginTop: '24px' }}>
+    <div style={{ marginTop: '24px' }}>
       <div className={classes.root}>
         <Typography
           id="continuous-slider"
@@ -69,6 +69,6 @@ export default function ContinuousSlider({
           </Grid>
         </Grid>
       </div>
-    </Card>
+    </div>
   );
 }
