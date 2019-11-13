@@ -1,8 +1,15 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useRef,
+} from 'react';
 import Button from '@material-ui/core/Button';
 import VolumeSlider from './VolumeSlider';
 import audioCtx from '../audioCtx';
 import { generateSchedule, getRandomInt } from '../defaultSchedule';
+import useAnimationFrame from '../useAnimationFrame';
 
 export default function Sequencer({ initGain }) {
   const {
@@ -19,6 +26,21 @@ export default function Sequencer({ initGain }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [stepCount, setStepCount] = useState(getStepCount());
   const [infinite, setInfinite] = useState(false);
+
+  const divTest = useRef();
+  const cnt = useRef(0);
+  let playing = useRef();
+  playing = isPlaying;
+
+  useAnimationFrame(deltaTime => {
+    const howMany = getStepCount();
+    if (cnt.current < howMany && playing) {
+      cnt.current += 1;
+    } else {
+      cnt.current = 1;
+    }
+    divTest.current.style.top = `${Math.round(cnt.current)}px`;
+  });
 
   useEffect(() => {
     function tick() {
@@ -73,6 +95,7 @@ export default function Sequencer({ initGain }) {
         AmbientCompanion
       </h1>
       <h2
+        ref={divTest}
         style={{
           fontSize: '20px',
           marginBlockEnd: '24px',
@@ -83,6 +106,16 @@ export default function Sequencer({ initGain }) {
       >
         by feline astronauts
       </h2>
+      <div
+        ref={divTest}
+        style={{
+          position: 'absolute',
+          left: '400px',
+          width: '10px',
+          height: '10px',
+          background: '#555',
+        }}
+      />
       <div style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <Button
