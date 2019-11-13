@@ -10,6 +10,7 @@ import VolumeSlider from './VolumeSlider';
 import audioCtx from '../audioCtx';
 import { generateSchedule, getRandomInt } from '../defaultSchedule';
 import useAnimationFrame from '../useAnimationFrame';
+import ICOplay from '../play.svg';
 
 export default function Sequencer({ initGain }) {
   const {
@@ -35,11 +36,11 @@ export default function Sequencer({ initGain }) {
   useAnimationFrame(deltaTime => {
     const howMany = getStepCount();
     if (cnt.current < howMany && playing) {
-      cnt.current += 1;
+      cnt.current += getStep() / howMany;
     } else {
-      cnt.current = 1;
+      cnt.current = 0;
     }
-    divTest.current.style.top = `${Math.round(cnt.current)}px`;
+    divTest.current.style.top = `${Math.round(cnt.current - 5)}px`;
   });
 
   useEffect(() => {
@@ -84,7 +85,12 @@ export default function Sequencer({ initGain }) {
   }
 
   return (
-    <div style={{ display: 'block', width: '360px' }}>
+    <div
+      style={{
+        display: 'block',
+        width: '360px',
+      }}
+    >
       <h1
         style={{
           fontSize: '28px',
@@ -110,12 +116,15 @@ export default function Sequencer({ initGain }) {
         ref={divTest}
         style={{
           position: 'absolute',
-          left: '400px',
+          left: '-8px',
           width: '10px',
           height: '10px',
-          background: '#555',
+          color: 'red',
+          display: isPlaying ? 'block' : 'none',
         }}
-      />
+      >
+        <img src={ICOplay} alt="." />
+      </div>
       <div style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <Button
@@ -173,7 +182,13 @@ export default function Sequencer({ initGain }) {
       <div style={{}}>Pattern</div>
       {stepCount > metro % stepCount ? (
         <div
-          style={{ position: 'relative', overflowX: 'auto', height: '60px' }}
+          style={{
+            position: 'relative',
+            overflowX: 'auto',
+            height: '80px',
+            width: '260px',
+            whiteSpace: 'nowrap',
+          }}
         >
           {schedule.synths.map((synth, index) => (
             <div style={{ height: '5px', margin: '3px' }}>
@@ -202,6 +217,15 @@ export default function Sequencer({ initGain }) {
           />
         </div>
       ) : null}
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <Button
+          variant="text"
+          color="primary"
+          onClick={() => setInfinite(prev => !prev)}
+        >
+          {infinite ? 'Infinite Mode ON' : 'Infinite Mode OFF'}
+        </Button>
+      </div>
     </div>
   );
 }
