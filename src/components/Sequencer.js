@@ -223,7 +223,7 @@ export default function Sequencer({ initGain }) {
           color="primary"
           onClick={() => setInfinite(prev => !prev)}
         >
-          {infinite ? 'Loop Mode ON' : 'Infinite Mode ON'}
+          {infinite ? 'Infinite Mode ON' : 'Loop Mode ON'}
         </Button>
       </div>
     </div>
