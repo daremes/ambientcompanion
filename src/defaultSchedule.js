@@ -22,7 +22,7 @@ export function getPattern(patternLength) {
   const arr = [];
   for (let i = 0; i < patternLength; i += 1) {
     const newStep = {
-      on: Math.random() >= 0.7,
+      on: Math.random() >= 0.75,
       frequency: getRandomTone(),
     };
     arr.push(newStep);
@@ -31,13 +31,16 @@ export function getPattern(patternLength) {
   return arr;
 }
 
-export function generateSchedule(patternLength) {
+export function generateSchedule(patternLength, tempo) {
   if (!patternLength) {
     patternLength = 32;
   }
+  if (!tempo) {
+    tempo = 120;
+  }
   return {
     patternLength: patternLength,
-    tempo: 120,
+    tempo: tempo,
     synths: [
       {
         instrument: {
@@ -81,7 +84,7 @@ export function generateSchedule(patternLength) {
       {
         instrument: {
           voices: 1,
-          oscType: 'triangle',
+          oscType: 'sine',
           envelope: {
             attack: 0.1,
             decay: 0.2,

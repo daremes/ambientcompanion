@@ -17,6 +17,9 @@ const unsupported = iOS || safari;
 let step = -1;
 let schedule = defaultSchedule;
 let stepCount = defaultSchedule.patternLength;
+let tempo = defaultSchedule.tempo;
+let beatLengthInSeconds = 1 / (tempo / 60);
+console.log(beatLengthInSeconds);
 let masterGainNode = undefined;
 let panNode = undefined;
 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -29,6 +32,7 @@ let sourceAudio = [];
 let wetGain = undefined;
 let dryGain = undefined;
 let globalReverb = 0.2;
+let stepperEvent = undefined;
 
 function reSchedule(newSchedule) {
   schedule = { ...newSchedule };
@@ -150,11 +154,11 @@ function handleSequencerSwitch() {
 
     audioContext.resume();
     clock.start();
-    clock
+    stepperEvent = clock
       .callbackAtTime(function() {
         handlePlayStep();
       }, 0)
-      .repeat(0.5);
+      .repeat(beatLengthInSeconds);
   } else {
     masterGainNode.gain.setTargetAtTime(0, audioContext.currentTime, 1);
     isPlaying = false;
