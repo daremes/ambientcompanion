@@ -155,7 +155,7 @@ function handleSequencerSwitch() {
     audioContext.resume();
     clock.start();
     stepperEvent = clock
-      .callbackAtTime(function() {
+      .callbackAtTime(() => {
         handlePlayStep();
       }, 0)
       .repeat(beatLengthInSeconds);
