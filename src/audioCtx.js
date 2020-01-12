@@ -136,6 +136,7 @@ function triggerEvent(is) {
 }
 
 function handleSequencerSwitch() {
+  console.log(audioContext.sampleRate);
   if (!isPlaying) {
     isPlaying = true;
     audioContext = !audioContext ? new AudioContext() : audioContext;
@@ -194,9 +195,14 @@ function getStep() {
   return step;
 }
 
+function getSampleRate() {
+  return audioContext.sampleRate;
+}
+
 const audioCtx = createContext({
   getAudioContext,
   getMasterGainNode,
+  getSampleRate,
   clock,
   schedule,
   handlePlayStep,

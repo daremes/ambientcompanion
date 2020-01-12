@@ -20,6 +20,7 @@ export default function Sequencer({ initGain }) {
     getMasterGainNode,
     getStepCount,
     getStep,
+    getSampleRate,
   } = useContext(audioCtx);
   const [metro, setMetro] = useState(getStep());
   const [schedule, setSchedule] = useState(getSchedule());
@@ -27,6 +28,7 @@ export default function Sequencer({ initGain }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [stepCount, setStepCount] = useState(getStepCount());
   const [infinite, setInfinite] = useState(false);
+  const [sr, setSr] = useState(getSampleRate());
 
   const divTest = useRef();
   const cnt = useRef(0);
@@ -142,6 +144,7 @@ export default function Sequencer({ initGain }) {
             RESCHEDULE
           </Button>
         </div>
+        <div>sample rate: {sr}</div>
         <div style={{ width: '100%', maxWidth: '360px' }}>
           <VolumeSlider
             initGain={0.5}
