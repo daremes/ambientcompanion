@@ -24,6 +24,8 @@ export default function Sequencer({ initGain }) {
   const [infinite, setInfinite] = useState(false);
   const [sr, setSr] = useState(getSampleRate());
   const [loaded, setLoaded] = useState(false);
+  const [err, setErr] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('Loading audio stuff');
 
   const divTest = useRef();
   const cnt = useRef(0);
@@ -41,10 +43,12 @@ export default function Sequencer({ initGain }) {
   // });
 
   useEffect(() => {
-    loadAudioData().then(sample => {
-      if (sample) {
-        console.log('source loaded: ', sample);
+    loadAudioData().then(data => {
+      if (data) {
+        console.log('source loaded: ', data);
+        setLoaded(true);
       } else {
+        setLoadingMessage('Failed to load audio data, Bummer.');
         console.log('Error loading audio data');
       }
     });
@@ -237,8 +241,8 @@ export default function Sequencer({ initGain }) {
           </div>
         </>
       ) : (
-          <div>Loading stuff</div>
-        )}
+        <div>{loadingMessage}</div>
+      )}
     </div>
   );
 }

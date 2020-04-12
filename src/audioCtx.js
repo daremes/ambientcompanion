@@ -25,12 +25,11 @@ const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioContext = new AudioContext();
 let clock = new WAAClock(audioContext);
 let reverbNode = undefined;
-let bufferLoader = undefined;
 let isPlaying = false;
 let sourceAudio = [];
 let wetGain = undefined;
 let dryGain = undefined;
-let globalReverb = 1;
+let globalReverb = 0.3;
 let stepperEvent = undefined;
 
 function reSchedule(newSchedule) {
@@ -47,12 +46,15 @@ function getSchedule() {
 async function getFile(ctx, filepath) {
   const response = await fetch(filepath);
   const arrayBuffer = await response.arrayBuffer();
-  const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+  const audioBuffer = await ctx.decodeAudioData(arrayBuffer).catch(() => {
+    console.log('Error during decoding');
+    return null;
+  });
   return audioBuffer;
 }
 
 async function loadAudioData() {
-  const filePath = 'Ir1';
+  const filePath = Ir1;
   const sample = await getFile(audioContext, filePath);
   sourceAudio[0] = sample;
   return sample;
