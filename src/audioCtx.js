@@ -6,9 +6,19 @@ import defaultSchedule, {
 } from './defaultSchedule';
 import VintageNoise from './sounds/vintageNoise.mp3';
 import Ir1 from './sounds/IR-1.m4a';
+import soundFiles from './soundFiles';
 
-import BufferLoader from './bufferLoader';
-console.log('run script');
+let irSource = [];
+let sampleSource = [];
+
+const { irs, samples } = soundFiles;
+irs.forEach((ir, index) => {
+  irSource[index] = require(`./sounds/${ir.fileName}`);
+});
+samples.forEach((sample, index) => {
+  sampleSource[index] = require(`./sounds/${sample.fileName}`);
+});
+
 const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 const unsupported = iOS || safari;
@@ -69,7 +79,7 @@ async function getFile(ctx, filepath) {
 }
 
 async function loadAudioData() {
-  const filePath = Ir1;
+  const filePath = irSource[0];
   const sample = await getFile(audioContext, filePath);
   sourceAudio[0] = sample;
   return sample;
