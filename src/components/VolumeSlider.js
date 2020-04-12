@@ -7,7 +7,16 @@ import Card from '@material-ui/core/Card';
 import VolumeDown from '@material-ui/icons/VolumeDown';
 import VolumeUp from '@material-ui/icons/VolumeUp';
 //
-import audioCtx from '../audioCtx';
+import {
+  reSchedule,
+  getSchedule,
+  handleSequencerSwitch,
+  getMasterGainNode,
+  getStepCount,
+  getStep,
+  getSampleRate,
+  getAudioContext,
+} from '../audioCtx';
 import changeNodeVolume from '../changeNodeVolume';
 
 const useStyles = makeStyles({
@@ -25,7 +34,6 @@ export default function ContinuousSlider({
   disabled,
   name,
 }) {
-  const { getAudioContext } = useContext(audioCtx);
   const classes = useStyles();
   const [value, setValue] = useState(initGain * 100);
 
@@ -34,7 +42,7 @@ export default function ContinuousSlider({
     if (gainNode) {
       changeNodeVolume(gainNode, getAudioContext(), initGain);
     }
-  }, [disabled, gainNode, getAudioContext, initGain]);
+  }, [disabled, gainNode, initGain]);
 
   const handleChange = (event, newValue) => {
     const volume = newValue / 100;

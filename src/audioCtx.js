@@ -1,4 +1,3 @@
-import { createContext } from 'react';
 import * as WAAClock from './WAAClock';
 import changeNodeVolume from './changeNodeVolume';
 import defaultSchedule, {
@@ -9,7 +8,7 @@ import VintageNoise from './sounds/vintageNoise.mp3';
 import Ir1 from './sounds/IR-1.m4a';
 
 import BufferLoader from './bufferLoader';
-
+console.log('run script');
 const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 const unsupported = iOS || safari;
@@ -31,7 +30,7 @@ let isPlaying = false;
 let sourceAudio = [];
 let wetGain = undefined;
 let dryGain = undefined;
-let globalReverb = 0.2;
+let globalReverb = 1;
 let stepperEvent = undefined;
 
 function reSchedule(newSchedule) {
@@ -45,31 +44,51 @@ function getSchedule() {
   return schedule;
 }
 
-function initLoadingSamples() {
-  // Fix up prefixing
-  bufferLoader = new BufferLoader(
-    audioContext,
-    [Ir1, VintageNoise],
-    finishedLoading
-  );
-
-  bufferLoader.load();
+async function getFile(ctx, filepath) {
+  const response = await fetch(filepath);
+  const arrayBuffer = await response.arrayBuffer();
+  const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+  return audioBuffer;
 }
 
-function finishedLoading(bufferList) {
-  console.log('sound sources loaded');
-  sourceAudio[0] = audioContext.createBufferSource();
-  sourceAudio[1] = audioContext.createBufferSource();
-  sourceAudio[0].buffer = bufferList[0];
-  sourceAudio[1].buffer = bufferList[1];
-
-  // source1.connect(masterGainNode);
-  // source2.connect(masterGainNode);
-  // source1.start(0);
-  // source2.start(0);
+async function loadAudioData() {
+  const filePath = 'Ir1';
+  const sample = await getFile(audioContext, filePath);
+  sourceAudio[0] = sample;
+  return sample;
 }
 
-initLoadingSamples();
+// Fix up prefixing
+// bufferLoader = new BufferLoader(
+//   audioContext,
+//   [Ir1, VintageNoise],
+//   finishedLoading
+// );
+
+// bufferLoader.load();
+
+// function finishedLoading(bufferList) {
+//   console.log('sound sources loaded');
+//   sourceAudio[0] = audioContext.createBufferSource();
+//   sourceAudio[1] = audioContext.createBufferSource();
+//   sourceAudio[0].buffer = bufferList[0];
+//   sourceAudio[1].buffer = bufferList[1];
+//   // source1.connect(masterGainNode);
+//   // source2.connect(masterGainNode);
+//   // source1.start(0);
+//   // source2.start(0);
+// }
+
+function disconnect(osc, gain) {
+  gain.disconnect();
+  osc.disconnect();
+}
+
+function triggerEvent(is) {
+  // const event = new CustomEvent('trigger', { detail: { isPlaying: is } });
+  const event = new Event('trigger');
+  window.dispatchEvent(event);
+}
 
 function handlePlayStep() {
   triggerEvent(isPlaying);
@@ -124,19 +143,15 @@ function handlePlayStep() {
 
         osc.start();
         osc.stop(audioContext.currentTime + 4);
+        // setTimeout(() => disconnect(osc, gainNode), 4000);
+
         // osc.onended = () => osc.disconnect();
       }
     }
   }
 }
 
-function triggerEvent(is) {
-  const event = new CustomEvent('trigger', { detail: { isPlaying: is } });
-  window.dispatchEvent(event);
-}
-
 function handleSequencerSwitch() {
-  console.log(audioContext.sampleRate);
   if (!isPlaying) {
     isPlaying = true;
     audioContext = !audioContext ? new AudioContext() : audioContext;
@@ -146,7 +161,7 @@ function handleSequencerSwitch() {
     wetGain = audioContext.createGain();
     dryGain = audioContext.createGain();
     reverbNode = audioContext.createConvolver();
-    reverbNode.buffer = sourceAudio[0].buffer;
+    reverbNode.buffer = sourceAudio[0];
 
     wetGain.connect(reverbNode);
     reverbNode.connect(masterGainNode);
@@ -155,7 +170,7 @@ function handleSequencerSwitch() {
 
     audioContext.resume();
     clock.start();
-    stepperEvent = clock
+    clock
       .callbackAtTime(() => {
         handlePlayStep();
       }, 0)
@@ -191,15 +206,13 @@ function getIsPlaying() {
   return isPlaying;
 }
 
-function getStep() {
-  return step;
-}
+const getStep = () => step;
 
 function getSampleRate() {
   return audioContext.sampleRate;
 }
 
-const audioCtx = createContext({
+export {
   getAudioContext,
   getMasterGainNode,
   getSampleRate,
@@ -214,6 +227,5 @@ const audioCtx = createContext({
   getStepCount,
   getStep,
   unsupported,
-});
-
-export default audioCtx;
+  loadAudioData,
+};

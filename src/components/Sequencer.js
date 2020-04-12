@@ -1,27 +1,21 @@
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-  useRef,
-} from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Button from '@material-ui/core/Button';
 import VolumeSlider from './VolumeSlider';
-import audioCtx from '../audioCtx';
+import {
+  reSchedule,
+  getSchedule,
+  handleSequencerSwitch,
+  getMasterGainNode,
+  getStepCount,
+  getStep,
+  getSampleRate,
+  loadAudioData,
+} from '../audioCtx';
 import { generateSchedule, getRandomInt } from '../defaultSchedule';
 import useAnimationFrame from '../useAnimationFrame';
 import ICOplay from '../play.svg';
 
 export default function Sequencer({ initGain }) {
-  const {
-    reSchedule,
-    getSchedule,
-    handleSequencerSwitch,
-    getMasterGainNode,
-    getStepCount,
-    getStep,
-    getSampleRate,
-  } = useContext(audioCtx);
   const [metro, setMetro] = useState(getStep());
   const [schedule, setSchedule] = useState(getSchedule());
   const [masterGainNode, setMasterGainNode] = useState(getMasterGainNode());
@@ -29,23 +23,32 @@ export default function Sequencer({ initGain }) {
   const [stepCount, setStepCount] = useState(getStepCount());
   const [infinite, setInfinite] = useState(false);
   const [sr, setSr] = useState(getSampleRate());
+  const [loaded, setLoaded] = useState(false);
 
   const divTest = useRef();
   const cnt = useRef(0);
   let playing = useRef();
   playing = isPlaying;
 
-  useAnimationFrame(deltaTime => {
-    const howMany = getStepCount();
-    if (cnt.current < howMany && playing) {
-      cnt.current += getStep() / howMany;
-    } else {
-      cnt.current = 0;
-    }
-    divTest.current.style.top = `${Math.round(cnt.current - 5)}px`;
-  });
+  // useAnimationFrame(deltaTime => {
+  //   const howMany = getStepCount();
+  //   if (cnt.current < howMany && playing) {
+  //     cnt.current += getStep() / howMany;
+  //   } else {
+  //     cnt.current = 0;
+  //   }
+  //   divTest.current.style.top = `${Math.round(cnt.current - 5)}px`;
+  // });
 
   useEffect(() => {
+    loadAudioData().then(sample => {
+      if (sample) {
+        console.log('source loaded: ', sample);
+      } else {
+        console.log('Error loading audio data');
+      }
+    });
+    console.log('source not yet loaded');
     function tick() {
       setMetro(metro => metro + 1);
     }
@@ -64,8 +67,8 @@ export default function Sequencer({ initGain }) {
     reSchedule(newSchedule);
     setSchedule(newSchedule);
     setStepCount(newPatternLength);
-    setMetro(getStep());
-  }, [getStep, reSchedule]);
+    setMetro(getStep);
+  }, []);
 
   useEffect(() => {
     if (metro % stepCount === stepCount - 1 && infinite) {
@@ -114,121 +117,128 @@ export default function Sequencer({ initGain }) {
       >
         by feline astronauts
       </h2>
-      <div
-        ref={divTest}
-        style={{
-          position: 'absolute',
-          left: '-8px',
-          width: '10px',
-          height: '10px',
-          color: 'red',
-          display: isPlaying ? 'block' : 'none',
-        }}
-      >
-        <img src={ICOplay} alt="." />
-      </div>
-      <div style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Button
-            variant={!isPlaying ? 'contained' : 'outlined'}
-            color="primary"
-            onClick={() => switchPlay()}
-          >
-            {isPlaying ? 'MUTE' : 'UNMUTE'}
-          </Button>
-          <Button
-            variant="text"
-            color="secondary"
-            onClick={() => memoizedHandleReschedule()}
-          >
-            RESCHEDULE
-          </Button>
-        </div>
-        <div>sample rate: {sr}</div>
-        <div style={{ width: '100%', maxWidth: '360px' }}>
-          <VolumeSlider
-            initGain={0.5}
-            gainNode={masterGainNode}
-            name="Master volume"
-          />
-        </div>
-      </div>
-      <div style={{ position: 'relative', height: '100px' }}>
-        <div style={{}}>{`Step ${(metro % stepCount) + 1} / ${stepCount}`}</div>
-        {metro > -1 && stepCount > metro % stepCount ? (
-          <>
-            {schedule.synths.map((s, index) => (
-              <div key={s + index}>
-                {s.pattern[metro % stepCount].on ? (
-                  <>
-                    <div
-                      style={{
-                        width: `${schedule.synths[index].pattern[
-                          metro % stepCount
-                        ].frequency / 12}px`,
-                        height: '5px',
-                        borderRadius: '5px',
-                        background: `#${Math.floor(
-                          Math.random() * 16777216
-                        ).toString(16)}`,
-                        position: 'absolute',
-                        top: `${30 + index * 12}px`,
-                      }}
-                    />
-                  </>
-                ) : null}
-              </div>
-            ))}
-          </>
-        ) : null}
-      </div>
-      <div style={{}}>Pattern</div>
-      {stepCount > metro % stepCount ? (
-        <div
-          style={{
-            position: 'relative',
-            overflowX: 'auto',
-            height: '80px',
-            width: '260px',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {schedule.synths.map((synth, index) => (
-            <div style={{ height: '5px', margin: '3px' }}>
-              {synth.pattern.map((pattern, i) => (
-                <div
-                  style={{
-                    display: 'inline-block',
-                    height: '2px',
-                    width: '2px',
-                    marginRight: '1px',
-                    background: pattern.on ? '#666' : 'transparent',
-                  }}
-                />
-              ))}
-            </div>
-          ))}
+      {loaded ? (
+        <>
           <div
+            ref={divTest}
             style={{
               position: 'absolute',
-              width: '2px',
-              height: '45px',
-              background: 'rgba(0,0,0,0.1)',
-              top: '10px',
-              left: `${(metro % stepCount) * 3 + 3}px`,
+              left: '-8px',
+              width: '10px',
+              height: '10px',
+              color: 'red',
+              display: isPlaying ? 'block' : 'none',
             }}
-          />
-        </div>
-      ) : null}
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <Button
-          variant="text"
-          color="primary"
-          onClick={() => setInfinite(prev => !prev)}
-        >
-          {infinite ? 'InfiniteMode On' : 'LoopMode On'}
-        </Button>
-      </div>
+          >
+            <img src={ICOplay} alt="." />
+          </div>
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Button
+                variant={!isPlaying ? 'contained' : 'outlined'}
+                color="primary"
+                onClick={() => switchPlay()}
+              >
+                {isPlaying ? 'MUTE' : 'UNMUTE'}
+              </Button>
+              <Button
+                variant="text"
+                color="secondary"
+                onClick={() => memoizedHandleReschedule()}
+              >
+                RESCHEDULE
+              </Button>
+            </div>
+            <div>sample rate: {sr}</div>
+            <div style={{ width: '100%', maxWidth: '360px' }}>
+              <VolumeSlider
+                initGain={0.5}
+                gainNode={masterGainNode}
+                name="Master volume"
+              />
+            </div>
+          </div>
+          <div style={{ position: 'relative', height: '100px' }}>
+            <div style={{}}>{`Step ${(metro % stepCount) +
+              1} / ${stepCount}`}</div>
+            {metro > -1 && stepCount > metro % stepCount ? (
+              <>
+                {schedule.synths.map((s, index) => (
+                  <div key={s + index}>
+                    {s.pattern[metro % stepCount].on ? (
+                      <>
+                        <div
+                          style={{
+                            width: `${schedule.synths[index].pattern[
+                              metro % stepCount
+                            ].frequency / 12}px`,
+                            height: '5px',
+                            borderRadius: '5px',
+                            background: `#${Math.floor(
+                              Math.random() * 16777216
+                            ).toString(16)}`,
+                            position: 'absolute',
+                            top: `${30 + index * 12}px`,
+                          }}
+                        />
+                      </>
+                    ) : null}
+                  </div>
+                ))}
+              </>
+            ) : null}
+          </div>
+          <div style={{}}>Pattern</div>
+          {stepCount > metro % stepCount ? (
+            <div
+              style={{
+                position: 'relative',
+                overflowX: 'auto',
+                height: '80px',
+                width: '260px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {schedule.synths.map((synth, index) => (
+                <div style={{ height: '5px', margin: '3px' }}>
+                  {synth.pattern.map((pattern, i) => (
+                    <div
+                      style={{
+                        display: 'inline-block',
+                        height: '2px',
+                        width: '2px',
+                        marginRight: '1px',
+                        background: pattern.on ? '#666' : 'transparent',
+                      }}
+                    />
+                  ))}
+                </div>
+              ))}
+              <div
+                style={{
+                  position: 'absolute',
+                  width: '2px',
+                  height: '45px',
+                  background: 'rgba(0,0,0,0.1)',
+                  top: '10px',
+                  left: `${(metro % stepCount) * 3 + 3}px`,
+                }}
+              />
+            </div>
+          ) : null}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Button
+              variant="text"
+              color="primary"
+              onClick={() => setInfinite(prev => !prev)}
+            >
+              {infinite ? 'InfiniteMode On' : 'LoopMode On'}
+            </Button>
+          </div>
+        </>
+      ) : (
+          <div>Loading stuff</div>
+        )}
     </div>
   );
 }

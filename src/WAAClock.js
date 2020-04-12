@@ -6,7 +6,7 @@ var CLOCK_DEFAULTS = {
 };
 
 // ==================== Event ==================== //
-var Event = function(clock, deadline, func) {
+var Event = function (clock, deadline, func) {
   this.clock = clock;
   this.func = func;
   this._cleared = false; // Flag used to clear an event inside callback
@@ -22,14 +22,14 @@ var Event = function(clock, deadline, func) {
 };
 
 // Unschedules the event
-Event.prototype.clear = function() {
+Event.prototype.clear = function () {
   this.clock._removeEvent(this);
   this._cleared = true;
   return this;
 };
 
 // Sets the event to repeat every `time` seconds.
-Event.prototype.repeat = function(time) {
+Event.prototype.repeat = function (time) {
   if (time === 0) throw new Error('delay cannot be 0');
   this.repeatTime = time;
   if (!this.clock._hasEvent(this))
@@ -40,7 +40,7 @@ Event.prototype.repeat = function(time) {
 // Sets the time tolerance of the event.
 // The event will be executed in the interval `[deadline - early, deadline + late]`
 // If the clock fails to execute the event in time, the event will be dropped.
-Event.prototype.tolerance = function(values) {
+Event.prototype.tolerance = function (values) {
   if (typeof values.late === 'number') this.toleranceLate = values.late;
   if (typeof values.early === 'number') this.toleranceEarly = values.early;
   this._refreshEarlyLateDates();
@@ -52,14 +52,14 @@ Event.prototype.tolerance = function(values) {
 };
 
 // Returns true if the event is repeated, false otherwise
-Event.prototype.isRepeated = function() {
+Event.prototype.isRepeated = function () {
   return this.repeatTime !== null;
 };
 
 // Schedules the event to be ran before `deadline`.
 // If the time is within the event tolerance, we handle the event immediately.
 // If the event was already scheduled at a different time, it is rescheduled.
-Event.prototype.schedule = function(deadline) {
+Event.prototype.schedule = function (deadline) {
   this._cleared = false;
   this.deadline = deadline;
   this._refreshEarlyLateDates();
@@ -72,7 +72,7 @@ Event.prototype.schedule = function(deadline) {
   } else this.clock._insertEvent(this);
 };
 
-Event.prototype.timeStretch = function(tRef, ratio) {
+Event.prototype.timeStretch = function (tRef, ratio) {
   if (this.isRepeated()) this.repeatTime = this.repeatTime * ratio;
 
   var deadline = tRef + ratio * (this.deadline - tRef);
@@ -86,7 +86,7 @@ Event.prototype.timeStretch = function(tRef, ratio) {
 };
 
 // Executes the event
-Event.prototype._execute = function() {
+Event.prototype._execute = function () {
   if (this.clock._started === false) return;
   this.clock._removeEvent(this);
 
@@ -102,13 +102,13 @@ Event.prototype._execute = function() {
 };
 
 // Updates cached times
-Event.prototype._refreshEarlyLateDates = function() {
+Event.prototype._refreshEarlyLateDates = function () {
   this._latestTime = this.deadline + this.toleranceLate;
   this._earliestTime = this.deadline - this.toleranceEarly;
 };
 
 // ==================== WAAClock ==================== //
-var WAAClock = (module.exports = function(context, opts) {
+var WAAClock = (module.exports = function (context, opts) {
   var self = this;
   opts = opts || {};
   this.tickMethod = opts.tickMethod || 'ScriptProcessorNode';
@@ -121,26 +121,26 @@ var WAAClock = (module.exports = function(context, opts) {
 
 // ---------- Public API ---------- //
 // Schedules `func` to run after `delay` seconds.
-WAAClock.prototype.setTimeout = function(func, delay) {
+WAAClock.prototype.setTimeout = function (func, delay) {
   return this._createEvent(func, this._absTime(delay));
 };
 
 // Schedules `func` to run before `deadline`.
-WAAClock.prototype.callbackAtTime = function(func, deadline) {
+WAAClock.prototype.callbackAtTime = function (func, deadline) {
   return this._createEvent(func, deadline);
 };
 
 // Stretches `deadline` and `repeat` of all scheduled `events` by `ratio`, keeping
 // their relative distance to `tRef`. In fact this is equivalent to changing the tempo.
-WAAClock.prototype.timeStretch = function(tRef, events, ratio) {
-  events.forEach(function(event) {
+WAAClock.prototype.timeStretch = function (tRef, events, ratio) {
+  events.forEach(function (event) {
     event.timeStretch(tRef, ratio);
   });
   return events;
 };
 
 // Removes all scheduled events and starts the clock
-WAAClock.prototype.start = function() {
+WAAClock.prototype.start = function () {
   if (this._started === false) {
     var self = this;
     this._started = true;
@@ -151,8 +151,8 @@ WAAClock.prototype.start = function() {
       // We have to keep a reference to the node to avoid garbage collection
       this._clockNode = this.context.createScriptProcessor(bufferSize, 1, 1);
       this._clockNode.connect(this.context.destination);
-      this._clockNode.onaudioprocess = function() {
-        process.nextTick(function() {
+      this._clockNode.onaudioprocess = function () {
+        process.nextTick(function () {
           self._tick();
         });
       };
@@ -163,7 +163,7 @@ WAAClock.prototype.start = function() {
 };
 
 // Stops the clock
-WAAClock.prototype.stop = function() {
+WAAClock.prototype.stop = function () {
   if (this._started === true) {
     this._started = false;
     this._clockNode.disconnect();
@@ -174,7 +174,7 @@ WAAClock.prototype.stop = function() {
 
 // This function is ran periodically, and at each tick it executes
 // events for which `currentTime` is included in their tolerance interval.
-WAAClock.prototype._tick = function() {
+WAAClock.prototype._tick = function () {
   var event = this._events.shift();
 
   while (event && event._earliestTime <= this.context.currentTime) {
@@ -187,28 +187,28 @@ WAAClock.prototype._tick = function() {
 };
 
 // Creates an event and insert it to the list
-WAAClock.prototype._createEvent = function(func, deadline) {
+WAAClock.prototype._createEvent = function (func, deadline) {
   return new Event(this, deadline, func);
 };
 
 // Inserts an event to the list
-WAAClock.prototype._insertEvent = function(event) {
+WAAClock.prototype._insertEvent = function (event) {
   this._events.splice(this._indexByTime(event._earliestTime), 0, event);
 };
 
 // Removes an event from the list
-WAAClock.prototype._removeEvent = function(event) {
+WAAClock.prototype._removeEvent = function (event) {
   var ind = this._events.indexOf(event);
   if (ind !== -1) this._events.splice(ind, 1);
 };
 
 // Returns true if `event` is in queue, false otherwise
-WAAClock.prototype._hasEvent = function(event) {
+WAAClock.prototype._hasEvent = function (event) {
   return this._events.indexOf(event) !== -1;
 };
 
 // Returns the index of the first event whose deadline is >= to `deadline`
-WAAClock.prototype._indexByTime = function(deadline) {
+WAAClock.prototype._indexByTime = function (deadline) {
   // performs a binary search
   var low = 0,
     high = this._events.length,
@@ -222,11 +222,11 @@ WAAClock.prototype._indexByTime = function(deadline) {
 };
 
 // Converts from relative time to absolute time
-WAAClock.prototype._absTime = function(relTime) {
+WAAClock.prototype._absTime = function (relTime) {
   return relTime + this.context.currentTime;
 };
 
 // Converts from absolute time to relative time
-WAAClock.prototype._relTime = function(absTime) {
+WAAClock.prototype._relTime = function (absTime) {
   return absTime - this.context.currentTime;
 };
