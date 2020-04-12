@@ -54,7 +54,7 @@ export default function ContinuousSlider({
     <div style={{ marginTop: '24px' }}>
       <div className={classes.root}>
         <Typography
-          id="continuous-slider"
+          id='continuous-slider'
           className={classes.title}
           gutterBottom
         >
@@ -69,7 +69,7 @@ export default function ContinuousSlider({
               disabled={disabled}
               value={value}
               onChange={handleChange}
-              aria-labelledby="continuous-slider"
+              aria-labelledby='continuous-slider'
             />
           </Grid>
           <Grid item>

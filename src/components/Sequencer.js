@@ -43,16 +43,20 @@ export default function Sequencer({ initGain }) {
   // });
 
   useEffect(() => {
-    loadAudioData().then(data => {
-      if (data) {
-        console.log('source loaded: ', data);
+    loadAudioData().then(loadingErrors => {
+      if (loadingErrors.length === 0) {
+        console.log('Audio data loaded!');
         setLoaded(true);
       } else {
-        setLoadingMessage('Failed to load audio data, Bummer.');
+        setLoadingMessage(
+          `Failed to load audio data. Bummer. Fujtajbl: ${JSON.stringify(
+            loadingErrors
+          )}`
+        );
         console.log('Error loading audio data');
       }
     });
-    console.log('source not yet loaded');
+    console.log('Audio data not yet loaded...');
     function tick() {
       setMetro(metro => metro + 1);
     }
@@ -134,20 +138,20 @@ export default function Sequencer({ initGain }) {
               display: isPlaying ? 'block' : 'none',
             }}
           >
-            <img src={ICOplay} alt="." />
+            <img src={ICOplay} alt='.' />
           </div>
           <div style={{ marginBottom: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <Button
                 variant={!isPlaying ? 'contained' : 'outlined'}
-                color="primary"
+                color='primary'
                 onClick={() => switchPlay()}
               >
                 {isPlaying ? 'MUTE' : 'UNMUTE'}
               </Button>
               <Button
-                variant="text"
-                color="secondary"
+                variant='text'
+                color='secondary'
                 onClick={() => memoizedHandleReschedule()}
               >
                 RESCHEDULE
@@ -158,7 +162,7 @@ export default function Sequencer({ initGain }) {
               <VolumeSlider
                 initGain={0.5}
                 gainNode={masterGainNode}
-                name="Master volume"
+                name='Master volume'
               />
             </div>
           </div>
@@ -232,8 +236,8 @@ export default function Sequencer({ initGain }) {
           ) : null}
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <Button
-              variant="text"
-              color="primary"
+              variant='text'
+              color='primary'
               onClick={() => setInfinite(prev => !prev)}
             >
               {infinite ? 'InfiniteMode On' : 'LoopMode On'}

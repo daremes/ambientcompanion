@@ -4,19 +4,19 @@ import defaultSchedule, {
   generateSchedule,
   getRandomArbitrary,
 } from './defaultSchedule';
-import VintageNoise from './sounds/vintageNoise.mp3';
-import Ir1 from './sounds/IR-1.m4a';
 import soundFiles from './soundFiles';
 
-let irSource = [];
-let sampleSource = [];
+let irSources = [];
+let sampleSources = [];
+let decodedIrs = [];
+let decodedSamples = [];
 
 const { irs, samples } = soundFiles;
 irs.forEach((ir, index) => {
-  irSource[index] = require(`./sounds/${ir.fileName}`);
+  irSources[index] = require(`./sounds/${ir.fileName}`);
 });
 samples.forEach((sample, index) => {
-  sampleSource[index] = require(`./sounds/${sample.fileName}`);
+  sampleSources[index] = require(`./sounds/${sample.fileName}`);
 });
 
 const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -36,7 +36,6 @@ let audioContext = new AudioContext();
 let clock = new WAAClock(audioContext);
 let reverbNode = undefined;
 let isPlaying = false;
-let sourceAudio = [];
 let wetGain = undefined;
 let dryGain = undefined;
 let globalReverb = 0.35;
@@ -65,24 +64,39 @@ async function getFile(ctx, filepath) {
           return resolve(buffer);
         },
         () => {
-          console.log('Error during decoding: ');
-          return resolve(null);
+          console.log('Error during decoding: ', filepath);
+          return resolve({ error: true });
         }
       );
     });
   } else {
     return await ctx.decodeAudioData(arrayBuffer).catch(err => {
-      console.log('Error during decoding: ');
-      return null;
+      console.log('Error during decoding: ', filepath);
+      return { error: true };
     });
   }
 }
 
 async function loadAudioData() {
-  const filePath = irSource[0];
-  const sample = await getFile(audioContext, filePath);
-  sourceAudio[0] = sample;
-  return sample;
+  let loadingErrors = [];
+  for (let index = 0; index < irs.length; index++) {
+    const filePath = irSources[index];
+    const sample = await getFile(audioContext, filePath);
+    if (sample.error) {
+      loadingErrors.push(irs[index]);
+    }
+    decodedIrs[index] = sample;
+  }
+  for (let index = 0; index < samples.length; index++) {
+    const filePath = sampleSources[index];
+    const sample = await getFile(audioContext, filePath);
+    if (sample.error) {
+      loadingErrors.push(samples[index]);
+    }
+    decodedSamples[index] = sample;
+  }
+  console.log('ALL DONE');
+  return loadingErrors;
 }
 
 // Fix up prefixing
@@ -188,7 +202,7 @@ function handleSequencerSwitch() {
     wetGain = audioContext.createGain();
     dryGain = audioContext.createGain();
     reverbNode = audioContext.createConvolver();
-    reverbNode.buffer = sourceAudio[0];
+    reverbNode.buffer = decodedIrs[0];
 
     wetGain.connect(reverbNode);
     reverbNode.connect(masterGainNode);
