@@ -29,7 +29,7 @@ let isPlaying = false;
 let sourceAudio = [];
 let wetGain = undefined;
 let dryGain = undefined;
-let globalReverb = 0.3;
+let globalReverb = 0.95;
 let stepperEvent = undefined;
 
 function reSchedule(newSchedule) {
@@ -46,15 +46,23 @@ function getSchedule() {
 async function getFile(ctx, filepath) {
   const response = await fetch(filepath);
   const arrayBuffer = await response.arrayBuffer();
-  const audioBuffer = await ctx.decodeAudioData(arrayBuffer).catch(() => {
-    console.log('Error during decoding');
-    return null;
-  });
-  return audioBuffer;
+  // safari hack
+  if (ctx.decodeAudioData.length === 2) {
+    return new Promise(resolve => {
+      audioContext.decodeAudioData(arrayBuffer, buffer => {
+        return resolve(buffer);
+      });
+    });
+  } else {
+    return await ctx.decodeAudioData(arrayBuffer).catch(() => {
+      console.log('Error during decoding');
+      return null;
+    });
+  }
 }
 
 async function loadAudioData() {
-  const filePath = Ir1;
+  const filePath = VintageNoise;
   const sample = await getFile(audioContext, filePath);
   sourceAudio[0] = sample;
   return sample;
