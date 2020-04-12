@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 import VolumeSlider from './VolumeSlider';
 import {
@@ -12,6 +13,7 @@ import {
   loadAudioData,
 } from '../audioCtx';
 import { generateSchedule, getRandomInt } from '../defaultSchedule';
+import ImgLoader from '../images/loader.svg';
 import useAnimationFrame from '../useAnimationFrame';
 import ICOplay from '../play.svg';
 
@@ -245,8 +247,21 @@ export default function Sequencer({ initGain }) {
           </div>
         </>
       ) : (
-        <div>{loadingMessage}</div>
+        <LoaderContainer>
+          <img src={ImgLoader} alt='' />
+          {loadingMessage}
+        </LoaderContainer>
       )}
     </div>
   );
 }
+
+const LoaderContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  img {
+    max-height: 48px;
+  }
+`;
