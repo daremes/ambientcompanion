@@ -236,6 +236,9 @@ export default function Sequencer({ initGain }) {
               />
             </div>
           ) : null}
+          <CanvasWrapper>
+            <Canvas id='oscilloscope' />
+          </CanvasWrapper>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <Button
               variant='text'
@@ -264,4 +267,17 @@ const LoaderContainer = styled.div`
   img {
     max-height: 48px;
   }
+`;
+
+const Canvas = styled.canvas`
+  width: 320px;
+  height: 100px;
+  border: 1px solid #ccc;
+`;
+
+const CanvasWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
 `;
