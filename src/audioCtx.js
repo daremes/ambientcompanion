@@ -111,27 +111,6 @@ async function loadAudioData() {
   return loadingErrors;
 }
 
-// Fix up prefixing
-// bufferLoader = new BufferLoader(
-//   audioContext,
-//   [Ir1, VintageNoise],
-//   finishedLoading
-// );
-
-// bufferLoader.load();
-
-// function finishedLoading(bufferList) {
-//   console.log('sound sources loaded');
-//   sourceAudio[0] = audioContext.createBufferSource();
-//   sourceAudio[1] = audioContext.createBufferSource();
-//   sourceAudio[0].buffer = bufferList[0];
-//   sourceAudio[1].buffer = bufferList[1];
-//   // source1.connect(masterGainNode);
-//   // source2.connect(masterGainNode);
-//   // source1.start(0);
-//   // source2.start(0);
-// }
-
 function disconnect(osc, gain) {
   gain.disconnect();
   osc.disconnect();
@@ -213,7 +192,7 @@ function handleSequencerSwitch() {
     wetGain = audioContext.createGain();
     dryGain = audioContext.createGain();
     reverbNode = audioContext.createConvolver();
-    // reverbNode.buffer = decodedIrs[0];
+    reverbNode.buffer = decodedIrs[1];
 
     wetGain.connect(reverbNode);
     reverbNode.connect(masterGainNode);
