@@ -185,16 +185,16 @@ function handlePlayStep() {
         //   panNode.setPosition(pan, 0, 1 - Math.abs(pan));
         // }
 
-        gainNode.gain.setTargetAtTime(0.3, audioContext.currentTime, 0.001);
-        gainNode.gain.setTargetAtTime(
-          0.05,
-          audioContext.currentTime + 0.1,
-          0.01
-        );
-        gainNode.gain.setTargetAtTime(0, audioContext.currentTime + 0.15, 1);
-
+        // gainNode.gain.setTargetAtTime(0.3, audioContext.currentTime, 0.001);
+        // gainNode.gain.setTargetAtTime(
+        //   0.05,
+        //   audioContext.currentTime + 0.1,
+        //   0.01
+        // );
+        // gainNode.gain.setTargetAtTime(0, audioContext.currentTime + 0.15, 1);
+        gainNode.gain.value = 0.1;
         osc.start();
-        osc.stop(audioContext.currentTime + 4);
+        osc.stop(audioContext.currentTime + 0.2);
         // setTimeout(() => disconnect(osc, gainNode), 4000);
 
         // osc.onended = () => osc.disconnect();
