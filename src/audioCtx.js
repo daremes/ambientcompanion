@@ -255,9 +255,9 @@ function initializeAnalyzer(analyser) {
     analyser.getByteTimeDomainData(dataArray);
 
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+    canvasCtx.strokeStyle = 'rgb(0, 0, 0, 0.3';
 
     canvasCtx.lineWidth = 2;
-    canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
 
     canvasCtx.beginPath();
 
@@ -267,14 +267,14 @@ function initializeAnalyzer(analyser) {
 
     for (let i = 0; i < bufferLength; i++) {
       const v = dataArray[i] / 128.0;
-      const y = v * (canvas.height / 2);
+      const y = (v - 1.0) * 3.0 * canvas.height + canvas.height / 2;
+      // console.log(v);
 
       if (i === 0) {
         canvasCtx.moveTo(x, y);
       } else {
         canvasCtx.lineTo(x, y);
       }
-
       x += sliceWidth;
     }
 

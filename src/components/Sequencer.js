@@ -270,13 +270,14 @@ const LoaderContainer = styled.div`
 `;
 
 const Canvas = styled.canvas`
-  width: 320px;
-  height: 100px;
-  border: 1px solid #ccc;
+  width: 300px;
+  height: 140px;
+  border-radius: 70px;
 `;
 
 const CanvasWrapper = styled.div`
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   margin-bottom: 24px;
