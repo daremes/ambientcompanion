@@ -212,11 +212,11 @@ function handleSequencerSwitch() {
     masterGainNode = audioContext.createGain();
     wetGain = audioContext.createGain();
     dryGain = audioContext.createGain();
-    // reverbNode = audioContext.createConvolver();
+    reverbNode = audioContext.createConvolver();
     // reverbNode.buffer = decodedIrs[0];
 
-    wetGain.connect(masterGainNode);
-    // reverbNode.connect(masterGainNode);
+    wetGain.connect(reverbNode);
+    reverbNode.connect(masterGainNode);
     dryGain.connect(masterGainNode);
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
