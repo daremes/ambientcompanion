@@ -169,21 +169,21 @@ function handlePlayStep() {
         osc.type = schedule.synths[count].instrument.oscType;
         osc.frequency.setValueAtTime(frequency, audioContext.currentTime);
 
-        if (!unsupported) {
-          panNode.pan.setValueAtTime(
-            getRandomArbitrary(-1, 1),
-            audioContext.currentTime
-          );
-          panNode.pan.setTargetAtTime(
-            getRandomArbitrary(-1, 1),
-            audioContext.currentTime + 0.1,
-            0.5
-          );
-        } else {
-          const pan = getRandomArbitrary(-1, 1);
-          panNode.panningModel = 'equalpower';
-          panNode.setPosition(pan, 0, 1 - Math.abs(pan));
-        }
+        // if (!unsupported) {
+        //   panNode.pan.setValueAtTime(
+        //     getRandomArbitrary(-1, 1),
+        //     audioContext.currentTime
+        //   );
+        //   panNode.pan.setTargetAtTime(
+        //     getRandomArbitrary(-1, 1),
+        //     audioContext.currentTime + 0.1,
+        //     0.5
+        //   );
+        // } else {
+        //   const pan = getRandomArbitrary(-1, 1);
+        //   panNode.panningModel = 'equalpower';
+        //   panNode.setPosition(pan, 0, 1 - Math.abs(pan));
+        // }
 
         gainNode.gain.setTargetAtTime(0.3, audioContext.currentTime, 0.001);
         gainNode.gain.setTargetAtTime(
