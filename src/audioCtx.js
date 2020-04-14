@@ -192,9 +192,9 @@ function handlePlayStep() {
         //   0.01
         // );
         // gainNode.gain.setTargetAtTime(0, audioContext.currentTime + 0.15, 1);
-        gainNode.gain.value = 0.2;
+        gainNode.gain.value = 0.1;
         osc.start();
-        osc.stop(audioContext.currentTime + 0.1);
+        osc.stop(audioContext.currentTime + 1);
         // setTimeout(() => disconnect(osc, gainNode), 4000);
 
         // osc.onended = () => osc.disconnect();
