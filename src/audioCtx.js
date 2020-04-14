@@ -267,7 +267,7 @@ function initializeAnalyzer(analyser) {
 
     for (let i = 0; i < bufferLength; i++) {
       const v = dataArray[i] / 128.0;
-      const y = (v * canvas.height) / 2;
+      const y = v * (canvas.height / 2);
 
       if (i === 0) {
         canvasCtx.moveTo(x, y);
