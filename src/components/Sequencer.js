@@ -270,7 +270,7 @@ const LoaderContainer = styled.div`
 `;
 
 const Canvas = styled.canvas`
-  width: 300px;
+  width: 280px;
   height: 140px;
   border-radius: 70px;
 `;
