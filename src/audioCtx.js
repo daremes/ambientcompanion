@@ -186,7 +186,6 @@ function handlePlayStep() {
 }
 
 function handleSequencerSwitch() {
-  console.log(audioContext.state);
   if (!isPlaying) {
     isPlaying = true;
     audioContext.resume();
@@ -197,7 +196,7 @@ function handleSequencerSwitch() {
     wetGain = audioContext.createGain();
     dryGain = audioContext.createGain();
     reverbNode = audioContext.createConvolver();
-    // reverbNode.buffer = decodedIrs[1];
+    reverbNode.buffer = decodedIrs[1];
 
     wetGain.connect(reverbNode);
     reverbNode.connect(masterGainNode);
@@ -205,7 +204,15 @@ function handleSequencerSwitch() {
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     masterGainNode.connect(analyser);
-    masterGainNode.connect(audioContext.destination);
+
+    const compressor = audioContext.createDynamicsCompressor();
+    compressor.threshold.setValueAtTime(-50, audioContext.currentTime);
+    compressor.knee.setValueAtTime(40, audioContext.currentTime);
+    compressor.ratio.setValueAtTime(5, audioContext.currentTime);
+    compressor.attack.setValueAtTime(0.1, audioContext.currentTime);
+    compressor.release.setValueAtTime(0.25, audioContext.currentTime);
+    masterGainNode.connect(compressor);
+    compressor.connect(audioContext.destination);
 
     audioContext.resume();
     clock.start();
