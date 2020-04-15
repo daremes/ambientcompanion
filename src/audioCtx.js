@@ -11,6 +11,7 @@ let sampleSources = [];
 let decodedIrs = [];
 let decodedSamples = [];
 let numberOfOsc = 0;
+let sampleGainNodes = new Array(3);
 
 const { irs, samples } = soundFiles;
 irs.forEach((ir, index) => {
@@ -131,14 +132,36 @@ function subtract() {
 function handlePlayStep() {
   if (audioContext.state === 'running' && isPlaying) {
     triggerEvent();
-
-    const sampleSource = audioContext.createBufferSource();
-    sampleSource.buffer = decodedSamples[1];
-    sampleGainNode.gain.value = 0.4;
-    sampleSource.connect(sampleGainNode);
-    sampleSource.start();
-
     step = (step + 1) % stepCount;
+
+    if (step % 2 === 0 || Math.round(Math.random() * 10) === 1) {
+      const sampleSource = audioContext.createBufferSource();
+      sampleSource.buffer = decodedSamples[1];
+      sampleSource.connect(sampleGainNodes[1]);
+      sampleGainNodes[1].gain.value = 0.4;
+      sampleSource.start();
+    }
+
+    if (
+      (step % 8 === 4 && Math.round(Math.random() * 10) !== 1) ||
+      Math.round(Math.random() * 40) === 1
+    ) {
+      const sampleSource = audioContext.createBufferSource();
+      sampleSource.buffer = decodedSamples[0];
+      sampleSource.connect(sampleGainNodes[0]);
+      sampleGainNodes[0].gain.value = 0.5;
+      sampleSource.playbackRate.value = Math.random() + 1;
+      sampleSource.start();
+    }
+
+    if (Math.round(Math.random() * 60) === 1) {
+      const sampleSource = audioContext.createBufferSource();
+      sampleSource.buffer = decodedSamples[2];
+      sampleSource.connect(sampleGainNodes[2]);
+      sampleGainNodes[2].gain.value = 0.5;
+      sampleSource.start();
+    }
+
     for (let count = 0; count < schedule.synths.length; count += 1) {
       if (schedule.synths[count].pattern.length > step) {
         if (schedule.synths[count].pattern[step].on) {
@@ -162,31 +185,42 @@ function handlePlayStep() {
 
           if (!unsupported) {
             panNode.pan.setValueAtTime(
-              getRandomArbitrary(-1, 1),
+              frequency > 120 ? getRandomArbitrary(-1, 1) : 0,
               audioContext.currentTime
             );
-            panNode.pan.setTargetAtTime(
-              getRandomArbitrary(-1, 1),
-              audioContext.currentTime + 0.1,
-              0.5
-            );
+            // panNode.pan.setTargetAtTime(
+            //   getRandomArbitrary(-1, 1),
+            //   audioContext.currentTime + 0.1,
+            //   0.5
+            // );
           } else {
-            const pan = getRandomArbitrary(-1, 1);
+            const pan = frequency > 120 ? getRandomArbitrary(-1, 1) : 0;
             panNode.panningModel = 'equalpower';
             panNode.setPosition(pan, 0, 1 - Math.abs(pan));
           }
 
-          gainNode.gain.setTargetAtTime(0.3, audioContext.currentTime, 0.001);
+          const dynamics = Math.random() * 0.2 + 0.05;
+
+          gainNode.gain.setTargetAtTime(
+            dynamics,
+            audioContext.currentTime,
+            0.005
+          );
+
           gainNode.gain.setTargetAtTime(
             0.05,
             audioContext.currentTime + 0.1,
             0.01
           );
-          gainNode.gain.setTargetAtTime(0, audioContext.currentTime + 0.15, 1);
+          gainNode.gain.setTargetAtTime(
+            0,
+            audioContext.currentTime + 0.15,
+            0.5
+          );
           osc.start();
           numberOfOsc += 1;
-          osc.stop(audioContext.currentTime + 4);
-          setTimeout(() => subtract(), 4000);
+          osc.stop(audioContext.currentTime + 2);
+          setTimeout(() => subtract(), 2000);
 
           // osc.onended = () => osc.disconnect();
         }
@@ -207,13 +241,17 @@ function handleSequencerSwitch() {
     dryGain = audioContext.createGain();
     reverbNode = audioContext.createConvolver();
     reverbNode.buffer = decodedIrs[0];
-    sampleGainNode.connect(dryGain);
     wetGain.connect(reverbNode);
     reverbNode.connect(masterGainNode);
     dryGain.connect(masterGainNode);
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     masterGainNode.connect(analyser);
+    for (let i = 0; i < sampleGainNodes.length; i += 1) {
+      sampleGainNodes[i] = audioContext.createGain();
+      sampleGainNodes[i].connect(dryGain);
+      sampleGainNodes[i].connect(wetGain);
+    }
 
     dryGain.gain.value = 1 - globalReverb;
     wetGain.gain.value = globalReverb;

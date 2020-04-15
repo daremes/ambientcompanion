@@ -15,16 +15,22 @@ export default {
   ],
   samples: [
     {
-      fileName: 'vintageNoise.mp3',
-      name: 'Noise1',
+      fileName: 'RIM.m4a',
+      name: 'RIM',
       description: '',
-      type: 'noise',
+      type: 'SD',
     },
     {
       fileName: '808-BD.m4a',
       name: '808 Kick',
       description: '',
       type: 'BD',
+    },
+    {
+      fileName: 'vinyl.m4a',
+      name: 'Vinyl noise',
+      description: '',
+      type: 'FX',
     },
   ],
 };

@@ -15,7 +15,8 @@ import {
 import { generateSchedule, getRandomInt } from '../defaultSchedule';
 import ImgLoader from '../images/loader.svg';
 // import useAnimationFrame from '../useAnimationFrame';
-import ICOplay from '../play.svg';
+import ICOplay from '../images/play.svg';
+import ICOpause from '../images/pause.svg';
 
 export default function Sequencer({ initGain }) {
   const [metro, setMetro] = useState(getStep());
@@ -23,7 +24,7 @@ export default function Sequencer({ initGain }) {
   const [masterGainNode, setMasterGainNode] = useState(getMasterGainNode());
   const [isPlaying, setIsPlaying] = useState(false);
   const [stepCount, setStepCount] = useState(getStepCount());
-  const [infinite, setInfinite] = useState(false);
+  const [infinite, setInfinite] = useState(true);
   // const [sr, setSr] = useState(getSampleRate());
   const [loaded, setLoaded] = useState(false);
   // const [err, setErr] = useState(false);
@@ -153,7 +154,11 @@ export default function Sequencer({ initGain }) {
                 color='primary'
                 onClick={() => switchPlay()}
               >
-                {isPlaying ? 'MUTE' : 'UNMUTE'}
+                {isPlaying ? (
+                  <PlayIcon src={ICOpause} alt='' />
+                ) : (
+                  <PlayIcon src={ICOplay} alt='' />
+                )}
               </Button>
               <Button
                 variant='text'
@@ -291,4 +296,8 @@ const CanvasWrapper = styled.div`
 const PatternWrapper = styled.div`
   display: flex;
   justify-content: center;
+`;
+
+const PlayIcon = styled.img`
+  display: block;
 `;

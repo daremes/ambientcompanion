@@ -97,7 +97,7 @@ export function generateSchedule(patternLength, tempo) {
       {
         instrument: {
           voices: 1,
-          oscType: 'square',
+          oscType: 'triangle',
           envelope: {
             attack: 0.1,
             decay: 0.2,
