@@ -13,7 +13,7 @@ function App() {
     <React.Fragment>
       <CssBaseline />
       <ThemeProvider theme={theme}>
-        <div style={{ display: 'flex', margin: '24px' }}>
+        <div style={{ display: 'flex', margin: '8px' }}>
           <Sequencer initGain={0.2} />
         </div>
       </ThemeProvider>

@@ -24,7 +24,7 @@ export default function Sequencer({ initGain }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [stepCount, setStepCount] = useState(getStepCount());
   const [infinite, setInfinite] = useState(false);
-  const [sr, setSr] = useState(getSampleRate());
+  // const [sr, setSr] = useState(getSampleRate());
   const [loaded, setLoaded] = useState(false);
   const [err, setErr] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Loading audio stuff');
@@ -59,6 +59,7 @@ export default function Sequencer({ initGain }) {
       }
     });
     console.log('Audio data not yet loaded...');
+
     function tick() {
       setMetro(metro => metro + 1);
     }
@@ -129,7 +130,7 @@ export default function Sequencer({ initGain }) {
       </h2>
       {loaded ? (
         <>
-          <div
+          {/* <div
             ref={divTest}
             style={{
               position: 'absolute',
@@ -141,8 +142,8 @@ export default function Sequencer({ initGain }) {
             }}
           >
             <img src={ICOplay} alt='.' />
-          </div>
-          <div style={{ marginBottom: '24px' }}>
+          </div> */}
+          <div style={{ marginBottom: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <Button
                 variant={!isPlaying ? 'contained' : 'outlined'}
@@ -159,7 +160,7 @@ export default function Sequencer({ initGain }) {
                 RESCHEDULE
               </Button>
             </div>
-            <div>sample rate: {sr}</div>
+            {/* <div>sample rate: {sr}</div> */}
             <div style={{ width: '100%', maxWidth: '360px' }}>
               <VolumeSlider
                 initGain={0.5}
@@ -168,7 +169,7 @@ export default function Sequencer({ initGain }) {
               />
             </div>
           </div>
-          <div style={{ position: 'relative', height: '100px' }}>
+          {/* <div style={{ position: 'relative', height: '100px' }}>
             <div style={{}}>{`Step ${(metro % stepCount) +
               1} / ${stepCount}`}</div>
             {metro > -1 && stepCount > metro % stepCount ? (
@@ -197,45 +198,46 @@ export default function Sequencer({ initGain }) {
                 ))}
               </>
             ) : null}
-          </div>
-          <div style={{}}>Pattern</div>
-          {stepCount > metro % stepCount ? (
-            <div
-              style={{
-                position: 'relative',
-                overflowX: 'auto',
-                height: '80px',
-                width: '260px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {schedule.synths.map((synth, index) => (
-                <div style={{ height: '5px', margin: '3px' }}>
-                  {synth.pattern.map((pattern, i) => (
-                    <div
-                      style={{
-                        display: 'inline-block',
-                        height: '2px',
-                        width: '2px',
-                        marginRight: '1px',
-                        background: pattern.on ? '#666' : 'transparent',
-                      }}
-                    />
-                  ))}
-                </div>
-              ))}
+          </div> */}
+          {/* <div style={{}}>Pattern</div> */}
+          <PatternWrapper>
+            {stepCount > metro % stepCount ? (
               <div
                 style={{
-                  position: 'absolute',
-                  width: '2px',
-                  height: '45px',
-                  background: 'rgba(0,0,0,0.1)',
-                  top: '10px',
-                  left: `${(metro % stepCount) * 3 + 3}px`,
+                  position: 'relative',
+                  overflowX: 'auto',
+                  height: '60px',
+                  whiteSpace: 'nowrap',
                 }}
-              />
-            </div>
-          ) : null}
+              >
+                {schedule.synths.map((synth, index) => (
+                  <div style={{ height: '5px', margin: '3px' }}>
+                    {synth.pattern.map((pattern, i) => (
+                      <div
+                        style={{
+                          display: 'inline-block',
+                          height: '2px',
+                          width: '2px',
+                          marginRight: '1px',
+                          background: pattern.on ? '#666' : 'transparent',
+                        }}
+                      />
+                    ))}
+                  </div>
+                ))}
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: '2px',
+                    height: '45px',
+                    background: 'rgba(0,0,0,0.1)',
+                    top: '10px',
+                    left: `${(metro % stepCount) * 3 + 3}px`,
+                  }}
+                />
+              </div>
+            ) : null}
+          </PatternWrapper>
           <CanvasWrapper>
             <Canvas id='oscilloscope' />
           </CanvasWrapper>
@@ -265,13 +267,13 @@ const LoaderContainer = styled.div`
   justify-content: center;
   align-items: center;
   img {
-    max-height: 48px;
+    max-height: 128px;
   }
 `;
 
 const Canvas = styled.canvas`
-  width: 280px;
-  height: 140px;
+  width: 200px;
+  height: 80px;
   border-radius: 70px;
 `;
 
@@ -280,5 +282,10 @@ const CanvasWrapper = styled.div`
   width: 100%;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
+`;
+
+const PatternWrapper = styled.div`
+  display: flex;
+  justify-content: center;
 `;

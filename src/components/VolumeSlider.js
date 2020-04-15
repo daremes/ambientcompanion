@@ -51,15 +51,15 @@ export default function ContinuousSlider({
   };
 
   return (
-    <div style={{ marginTop: '24px' }}>
+    <div style={{ marginTop: '8px' }}>
       <div className={classes.root}>
-        <Typography
+        {/* <Typography
           id='continuous-slider'
           className={classes.title}
           gutterBottom
         >
           {name} {value / 100}
-        </Typography>
+        </Typography> */}
         <Grid container spacing={2}>
           <Grid item>
             <VolumeDown />

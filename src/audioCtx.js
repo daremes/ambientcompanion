@@ -117,77 +117,82 @@ function disconnect(osc, gain) {
 }
 
 function triggerEvent(is) {
+  console.log('tick');
   // const event = new CustomEvent('trigger', { detail: { isPlaying: is } });
   const event = new Event('trigger');
   window.dispatchEvent(event);
 }
 
 function handlePlayStep() {
-  triggerEvent(isPlaying);
-  step = (step + 1) % stepCount;
-  for (let count = 0; count < schedule.synths.length; count += 1) {
-    if (schedule.synths[count].pattern.length > step) {
-      if (schedule.synths[count].pattern[step].on) {
-        const osc = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        panNode = !unsupported
-          ? audioContext.createStereoPanner()
-          : audioContext.createPanner();
-        gainNode.gain.value = 0;
-        const { frequency } = schedule.synths[count].pattern[step];
+  if (audioContext.state === 'running' && isPlaying) {
+    triggerEvent(isPlaying);
+    step = (step + 1) % stepCount;
+    for (let count = 0; count < schedule.synths.length; count += 1) {
+      if (schedule.synths[count].pattern.length > step) {
+        if (schedule.synths[count].pattern[step].on) {
+          const osc = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          panNode = !unsupported
+            ? audioContext.createStereoPanner()
+            : audioContext.createPanner();
+          gainNode.gain.value = 0;
+          const { frequency } = schedule.synths[count].pattern[step];
 
-        osc.connect(gainNode);
-        gainNode.connect(panNode);
-        panNode.connect(dryGain);
-        panNode.connect(wetGain);
+          osc.connect(gainNode);
+          gainNode.connect(panNode);
+          panNode.connect(dryGain);
+          panNode.connect(wetGain);
 
-        // schedule.synths[count].instrument.reverbRatio;
+          // schedule.synths[count].instrument.reverbRatio;
 
-        dryGain.gain.value = 1.0 - globalReverb;
-        wetGain.gain.value = globalReverb;
+          dryGain.gain.value = 1.0 - globalReverb;
+          wetGain.gain.value = globalReverb;
 
-        osc.type = schedule.synths[count].instrument.oscType;
-        osc.frequency.setValueAtTime(frequency, audioContext.currentTime);
+          osc.type = schedule.synths[count].instrument.oscType;
+          osc.frequency.setValueAtTime(frequency, audioContext.currentTime);
 
-        if (!unsupported) {
-          panNode.pan.setValueAtTime(
-            getRandomArbitrary(-1, 1),
-            audioContext.currentTime
-          );
-          panNode.pan.setTargetAtTime(
-            getRandomArbitrary(-1, 1),
+          if (!unsupported) {
+            panNode.pan.setValueAtTime(
+              getRandomArbitrary(-1, 1),
+              audioContext.currentTime
+            );
+            panNode.pan.setTargetAtTime(
+              getRandomArbitrary(-1, 1),
+              audioContext.currentTime + 0.1,
+              0.5
+            );
+          } else {
+            const pan = getRandomArbitrary(-1, 1);
+            panNode.panningModel = 'equalpower';
+            panNode.setPosition(pan, 0, 1 - Math.abs(pan));
+          }
+
+          gainNode.gain.setTargetAtTime(0.3, audioContext.currentTime, 0.001);
+          gainNode.gain.setTargetAtTime(
+            0.05,
             audioContext.currentTime + 0.1,
-            0.5
+            0.01
           );
-        } else {
-          const pan = getRandomArbitrary(-1, 1);
-          panNode.panningModel = 'equalpower';
-          panNode.setPosition(pan, 0, 1 - Math.abs(pan));
+          gainNode.gain.setTargetAtTime(0, audioContext.currentTime + 0.15, 1);
+          osc.start();
+          osc.stop(audioContext.currentTime + 4);
+          // setTimeout(() => disconnect(osc, gainNode), 4000);
+
+          // osc.onended = () => osc.disconnect();
         }
-
-        gainNode.gain.setTargetAtTime(0.3, audioContext.currentTime, 0.001);
-        gainNode.gain.setTargetAtTime(
-          0.05,
-          audioContext.currentTime + 0.1,
-          0.01
-        );
-        gainNode.gain.setTargetAtTime(0, audioContext.currentTime + 0.15, 1);
-        osc.start();
-        osc.stop(audioContext.currentTime + 4);
-        // setTimeout(() => disconnect(osc, gainNode), 4000);
-
-        // osc.onended = () => osc.disconnect();
       }
     }
   }
 }
 
 function handleSequencerSwitch() {
+  console.log(audioContext.state);
   if (!isPlaying) {
     isPlaying = true;
-    audioContext = !audioContext ? new AudioContext() : audioContext;
-    clock = !clock ? new WAAClock(audioContext) : clock;
-
+    audioContext.resume();
+    // audioContext = !audioContext ? new AudioContext() : audioContext;
+    // clock = !clock ? new WAAClock(audioContext) : clock;
+    console.log(audioContext.state);
     masterGainNode = audioContext.createGain();
     wetGain = audioContext.createGain();
     dryGain = audioContext.createGain();
@@ -215,10 +220,12 @@ function handleSequencerSwitch() {
     isPlaying = false;
     step = -1;
     cancelAnimationFrame(animationRequest);
-    audioContext.close().then(() => {
-      audioContext = new AudioContext();
-      clock = new WAAClock(audioContext);
-    });
+    clock.stop();
+    audioContext.suspend();
+    // audioContext.close().then(() => {
+    //   audioContext = new AudioContext();
+    //   clock = new WAAClock(audioContext);
+    // });
   }
 }
 

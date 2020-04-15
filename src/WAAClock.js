@@ -91,10 +91,10 @@ Event.prototype._execute = function() {
   this.clock._removeEvent(this);
 
   if (this.clock.context.currentTime < this._latestTime) this.func(this);
-  else {
-    if (this.onexpired) this.onexpired(this);
-    console.warn('event expired');
-  }
+  // else {
+  //   if (this.onexpired) this.onexpired(this);
+  //   console.warn('event expired');
+  // }
   // In the case `schedule` is called inside `func`, we need to avoid
   // overrwriting with yet another `schedule`.
   if (!this.clock._hasEvent(this) && this.isRepeated() && !this._cleared)
