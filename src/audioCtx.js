@@ -37,6 +37,7 @@ let audioContext = new AudioContext();
 audioContext.suspend();
 let clock = new WAAClock(audioContext);
 let reverbNode = undefined;
+let sampleGainNode = undefined;
 let isPlaying = false;
 let wetGain = undefined;
 let dryGain = undefined;
@@ -130,6 +131,13 @@ function subtract() {
 function handlePlayStep() {
   if (audioContext.state === 'running' && isPlaying) {
     triggerEvent();
+
+    const sampleSource = audioContext.createBufferSource();
+    sampleSource.buffer = decodedSamples[1];
+    sampleGainNode.gain.value = 0.4;
+    sampleSource.connect(sampleGainNode);
+    sampleSource.start();
+
     step = (step + 1) % stepCount;
     for (let count = 0; count < schedule.synths.length; count += 1) {
       if (schedule.synths[count].pattern.length > step) {
@@ -148,9 +156,6 @@ function handlePlayStep() {
           panNode.connect(wetGain);
 
           // schedule.synths[count].instrument.reverbRatio;
-
-          dryGain.gain.value = 1.0 - globalReverb;
-          wetGain.gain.value = globalReverb;
 
           osc.type = schedule.synths[count].instrument.oscType;
           osc.frequency.setValueAtTime(frequency, audioContext.currentTime);
@@ -196,13 +201,13 @@ function handleSequencerSwitch() {
     audioContext.resume();
     // audioContext = !audioContext ? new AudioContext() : audioContext;
     // clock = !clock ? new WAAClock(audioContext) : clock;
-    console.log(audioContext.state);
     masterGainNode = audioContext.createGain();
+    sampleGainNode = audioContext.createGain();
     wetGain = audioContext.createGain();
     dryGain = audioContext.createGain();
     reverbNode = audioContext.createConvolver();
-    reverbNode.buffer = decodedIrs[1];
-
+    reverbNode.buffer = decodedIrs[0];
+    sampleGainNode.connect(dryGain);
     wetGain.connect(reverbNode);
     reverbNode.connect(masterGainNode);
     dryGain.connect(masterGainNode);
@@ -210,9 +215,12 @@ function handleSequencerSwitch() {
     analyser.fftSize = 2048;
     masterGainNode.connect(analyser);
 
+    dryGain.gain.value = 1 - globalReverb;
+    wetGain.gain.value = globalReverb;
+
     const compressor = audioContext.createDynamicsCompressor();
-    compressor.threshold.setValueAtTime(-50, audioContext.currentTime);
-    compressor.knee.setValueAtTime(40, audioContext.currentTime);
+    compressor.threshold.setValueAtTime(-10, audioContext.currentTime);
+    compressor.knee.setValueAtTime(10, audioContext.currentTime);
     compressor.ratio.setValueAtTime(5, audioContext.currentTime);
     compressor.attack.setValueAtTime(0.1, audioContext.currentTime);
     compressor.release.setValueAtTime(0.25, audioContext.currentTime);
@@ -265,7 +273,7 @@ function initializeAnalyzer(analyser) {
 
     for (let i = 0; i < bufferLength; i++) {
       const v = dataArray[i] / 128.0;
-      const y = (v - 1.0) * 3.0 * canvas.height + canvas.height / 2;
+      const y = (v - 1.0) * 2.0 * canvas.height + canvas.height / 2;
       // console.log(v);
 
       if (i === 0) {
