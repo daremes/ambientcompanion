@@ -28,7 +28,7 @@ export default function Sequencer({ initGain }) {
   const [loaded, setLoaded] = useState(false);
   // const [err, setErr] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Loading audio stuff');
-
+  const [oscCount, setOscCount] = useState(0);
   // const divTest = useRef();
   // const cnt = useRef(0);
   // let playing = useRef();
@@ -63,7 +63,8 @@ export default function Sequencer({ initGain }) {
     function tick() {
       setMetro(metro => metro + 1);
     }
-    function onTrigger() {
+    function onTrigger(e) {
+      setOscCount(e.detail.numberOfOsc);
       tick();
     }
     window.addEventListener('trigger', onTrigger);
@@ -127,6 +128,9 @@ export default function Sequencer({ initGain }) {
       >
         by feline astronauts
       </h2>
+      <div style={{ fontSize: '10px' }}>
+        <p>Debug | number of active oscillators: {oscCount}</p>
+      </div>
       {loaded ? (
         <>
           {/* <div

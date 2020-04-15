@@ -55,58 +55,6 @@ export function generateSchedule(patternLength, tempo) {
         },
         pattern: getPattern(patternLength),
       },
-      {
-        instrument: {
-          voices: 1,
-          oscType: 'triangle',
-          envelope: {
-            attack: 0.1,
-            decay: 0.2,
-            sustain: 0.5,
-            release: 0.1,
-          },
-        },
-        pattern: getPattern(patternLength),
-      },
-      {
-        instrument: {
-          voices: 1,
-          oscType: 'sine',
-          envelope: {
-            attack: 0.1,
-            decay: 0.2,
-            sustain: 0.5,
-            release: 0.1,
-          },
-        },
-        pattern: getPattern(patternLength),
-      },
-      {
-        instrument: {
-          voices: 1,
-          oscType: 'sine',
-          envelope: {
-            attack: 0.1,
-            decay: 0.2,
-            sustain: 0.5,
-            release: 0.1,
-          },
-        },
-        pattern: getPattern(patternLength),
-      },
-      {
-        instrument: {
-          voices: 1,
-          oscType: 'square',
-          envelope: {
-            attack: 0.1,
-            decay: 0.2,
-            sustain: 0.5,
-            release: 0.1,
-          },
-        },
-        pattern: getPattern(patternLength),
-      },
     ],
   };
 }

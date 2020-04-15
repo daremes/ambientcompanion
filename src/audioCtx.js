@@ -10,6 +10,7 @@ let irSources = [];
 let sampleSources = [];
 let decodedIrs = [];
 let decodedSamples = [];
+let numberOfOsc = 0;
 
 const { irs, samples } = soundFiles;
 irs.forEach((ir, index) => {
@@ -117,15 +118,18 @@ function disconnect(osc, gain) {
 }
 
 function triggerEvent(is) {
-  console.log('tick');
-  // const event = new CustomEvent('trigger', { detail: { isPlaying: is } });
-  const event = new Event('trigger');
+  const event = new CustomEvent('trigger', { detail: { numberOfOsc } });
+  // const event = new Event('trigger');
   window.dispatchEvent(event);
+}
+
+function subtract() {
+  numberOfOsc -= 1;
 }
 
 function handlePlayStep() {
   if (audioContext.state === 'running' && isPlaying) {
-    triggerEvent(isPlaying);
+    triggerEvent();
     step = (step + 1) % stepCount;
     for (let count = 0; count < schedule.synths.length; count += 1) {
       if (schedule.synths[count].pattern.length > step) {
@@ -175,8 +179,9 @@ function handlePlayStep() {
           );
           gainNode.gain.setTargetAtTime(0, audioContext.currentTime + 0.15, 1);
           osc.start();
-          osc.stop(audioContext.currentTime + 0.5);
-          // setTimeout(() => disconnect(osc, gainNode), 4000);
+          numberOfOsc += 1;
+          osc.stop(audioContext.currentTime + 4);
+          setTimeout(() => subtract(), 4000);
 
           // osc.onended = () => osc.disconnect();
         }
