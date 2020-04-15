@@ -197,7 +197,7 @@ function handleSequencerSwitch() {
     wetGain = audioContext.createGain();
     dryGain = audioContext.createGain();
     reverbNode = audioContext.createConvolver();
-    reverbNode.buffer = decodedIrs[1];
+    // reverbNode.buffer = decodedIrs[1];
 
     wetGain.connect(reverbNode);
     reverbNode.connect(masterGainNode);

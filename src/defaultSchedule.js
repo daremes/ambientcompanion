@@ -33,7 +33,7 @@ export function getPattern(patternLength) {
 
 export function generateSchedule(patternLength, tempo) {
   if (!patternLength) {
-    patternLength = 32;
+    patternLength = 64;
   }
   if (!tempo) {
     tempo = 120;

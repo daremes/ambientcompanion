@@ -14,7 +14,7 @@ import {
 } from '../audioCtx';
 import { generateSchedule, getRandomInt } from '../defaultSchedule';
 import ImgLoader from '../images/loader.svg';
-import useAnimationFrame from '../useAnimationFrame';
+// import useAnimationFrame from '../useAnimationFrame';
 import ICOplay from '../play.svg';
 
 export default function Sequencer({ initGain }) {
@@ -26,13 +26,13 @@ export default function Sequencer({ initGain }) {
   const [infinite, setInfinite] = useState(false);
   // const [sr, setSr] = useState(getSampleRate());
   const [loaded, setLoaded] = useState(false);
-  const [err, setErr] = useState(false);
+  // const [err, setErr] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Loading audio stuff');
 
-  const divTest = useRef();
-  const cnt = useRef(0);
-  let playing = useRef();
-  playing = isPlaying;
+  // const divTest = useRef();
+  // const cnt = useRef(0);
+  // let playing = useRef();
+  // playing = isPlaying;
 
   // useAnimationFrame(deltaTime => {
   //   const howMany = getStepCount();
@@ -117,7 +117,6 @@ export default function Sequencer({ initGain }) {
         AmbientCompanion
       </h1>
       <h2
-        ref={divTest}
         style={{
           fontSize: '20px',
           marginBlockEnd: '24px',
