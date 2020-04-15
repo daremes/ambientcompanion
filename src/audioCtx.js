@@ -11,7 +11,7 @@ let sampleSources = [];
 let decodedIrs = [];
 let decodedSamples = [];
 let numberOfOsc = 0;
-let sampleGainNodes = new Array(3);
+let sampleGainNodes = new Array(5);
 
 const { irs, samples } = soundFiles;
 irs.forEach((ir, index) => {
@@ -159,6 +159,22 @@ function handlePlayStep() {
       sampleSource.buffer = decodedSamples[2];
       sampleSource.connect(sampleGainNodes[2]);
       sampleGainNodes[2].gain.value = 0.5;
+      sampleSource.start();
+    }
+
+    if (Math.round(Math.random() * 60) === 1) {
+      const sampleSource = audioContext.createBufferSource();
+      sampleSource.buffer = decodedSamples[3];
+      sampleSource.connect(sampleGainNodes[3]);
+      sampleGainNodes[3].gain.value = 0.5;
+      sampleSource.start();
+    }
+
+    if (Math.round(Math.random() * 60) === 1) {
+      const sampleSource = audioContext.createBufferSource();
+      sampleSource.buffer = decodedSamples[4];
+      sampleSource.connect(sampleGainNodes[4]);
+      sampleGainNodes[4].gain.value = 0.5;
       sampleSource.start();
     }
 

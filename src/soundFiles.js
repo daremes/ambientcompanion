@@ -32,5 +32,17 @@ export default {
       description: '',
       type: 'FX',
     },
+    {
+      fileName: 'soundscape1.m4a',
+      name: 'Soundscape 1 Dm',
+      description: '',
+      type: 'Soundscape',
+    },
+    {
+      fileName: 'soundscape2.m4a',
+      name: 'Soundscape 2 Dm',
+      description: '',
+      type: 'Soundscape',
+    },
   ],
 };
