@@ -8,10 +8,13 @@ import soundFiles from './soundFiles';
 
 let irSources = [];
 let sampleSources = [];
+let audioTrackSources = [];
 let decodedIrs = [];
 let decodedSamples = [];
 let numberOfOsc = 0;
-let sampleGainNodes = new Array(5);
+let sampleGainNodes = new Array(defaultSchedule.samples.length);
+let sampleDryNodes = new Array(defaultSchedule.samples.length);
+let sampleWetNodes = new Array(defaultSchedule.samples.length);
 
 const { irs, samples } = soundFiles;
 irs.forEach((ir, index) => {
@@ -25,7 +28,7 @@ const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 const unsupported = iOS || safari;
 
-let step = -1;
+let step = 0;
 let schedule = defaultSchedule;
 let stepCount = defaultSchedule.patternLength;
 let tempo = defaultSchedule.tempo;
@@ -38,7 +41,6 @@ let audioContext = new AudioContext();
 audioContext.suspend();
 let clock = new WAAClock(audioContext);
 let reverbNode = undefined;
-let sampleGainNode = undefined;
 let isPlaying = false;
 let wetGain = undefined;
 let dryGain = undefined;
@@ -58,7 +60,7 @@ let animationRequest = undefined;
 
 function reSchedule(newSchedule) {
   schedule = { ...newSchedule };
-  stepCount = schedule.patternLength;
+  stepCount = newSchedule.patternLength;
   step = 0;
   return schedule;
 }
@@ -114,14 +116,13 @@ async function loadAudioData() {
   return loadingErrors;
 }
 
-function disconnect(osc, gain) {
-  gain.disconnect();
-  osc.disconnect();
-}
+// function disconnect(osc, gain) {
+//   gain.disconnect();
+//   osc.disconnect();
+// }
 
 function triggerEvent(is) {
   const event = new CustomEvent('trigger', { detail: { numberOfOsc } });
-  // const event = new Event('trigger');
   window.dispatchEvent(event);
 }
 
@@ -129,65 +130,160 @@ function subtract() {
   numberOfOsc -= 1;
 }
 
+function onPause() {
+  isPlaying = false;
+  // step = -1;
+  cancelAnimationFrame(animationRequest);
+  clock.stop();
+  audioContext.suspend();
+}
+
+function onResume() {
+  isPlaying = true;
+  audioContext.resume();
+  // audioContext = !audioContext ? new AudioContext() : audioContext;
+  // clock = !clock ? new WAAClock(audioContext) : clock;
+  masterGainNode = audioContext.createGain();
+  // sampleGainNode = audioContext.createGain();
+  wetGain = audioContext.createGain();
+  dryGain = audioContext.createGain();
+  reverbNode = audioContext.createConvolver();
+  reverbNode.buffer = decodedIrs[0];
+  wetGain.connect(reverbNode);
+  reverbNode.connect(masterGainNode);
+  dryGain.connect(masterGainNode);
+  const analyser = audioContext.createAnalyser();
+  analyser.fftSize = 2048;
+  const samplesAuxGain = audioContext.createGain();
+  samplesAuxGain.connect(dryGain);
+
+  masterGainNode.connect(analyser);
+
+  for (let i = 0; i < sampleGainNodes.length; i += 1) {
+    const { reverb, volume } = schedule.samples[i].instrument;
+    sampleGainNodes[i] = audioContext.createGain();
+    sampleWetNodes[i] = audioContext.createGain();
+    sampleDryNodes[i] = audioContext.createGain();
+    sampleGainNodes[i].connect(sampleWetNodes[i]);
+    sampleGainNodes[i].connect(sampleDryNodes[i]);
+    sampleWetNodes[i].connect(wetGain);
+    sampleDryNodes[i].connect(dryGain);
+    sampleGainNodes[i].gain.value = volume;
+    sampleDryNodes[i].gain.value = 1 - reverb;
+    sampleWetNodes[i].gain.value = reverb;
+  }
+
+  dryGain.gain.value = 1 - globalReverb;
+  wetGain.gain.value = globalReverb;
+
+  const compressor = audioContext.createDynamicsCompressor();
+  compressor.threshold.setValueAtTime(-10, audioContext.currentTime);
+  compressor.knee.setValueAtTime(10, audioContext.currentTime);
+  compressor.ratio.setValueAtTime(5, audioContext.currentTime);
+  compressor.attack.setValueAtTime(0.1, audioContext.currentTime);
+  compressor.release.setValueAtTime(0.25, audioContext.currentTime);
+  masterGainNode.connect(compressor);
+  compressor.connect(audioContext.destination);
+
+  audioContext.resume();
+  clock.start();
+  clock
+    .callbackAtTime(() => {
+      handlePlayStep();
+    }, 0)
+    .repeat(beatLengthInSeconds);
+  initializeAnalyzer(analyser);
+}
+
+function handleSequencerSwitch() {
+  if (!isPlaying) {
+    onResume();
+  } else {
+    masterGainNode.gain.setTargetAtTime(0, audioContext.currentTime, 0.005);
+    setTimeout(() => onPause(), 50);
+  }
+}
+
 function handlePlayStep() {
   if (audioContext.state === 'running' && isPlaying) {
     triggerEvent();
-    step = (step + 1) % stepCount;
+    const s = step % stepCount;
+    // console.log(`${s}/${stepCount}`);
+    for (let count = 0; count < schedule.samples.length; count += 1) {
+      if (schedule.samples[count].pattern.length > s) {
+        const { on } = schedule.samples[count].pattern[s];
+        const { pitchShiftLimit } = schedule.samples[count].instrument;
+        if (on) {
+          let playbackRate = 1;
+          audioTrackSources[count] = audioContext.createBufferSource();
+          audioTrackSources[count].buffer = decodedSamples[count];
+          audioTrackSources[count].connect(sampleGainNodes[count]);
+          if (pitchShiftLimit) {
+            playbackRate =
+              Math.random() * (1 - pitchShiftLimit) + (1 - pitchShiftLimit);
+          }
+          audioTrackSources[count].playbackRate.value = playbackRate;
 
-    if (step % 2 === 0 || Math.round(Math.random() * 10) === 1) {
-      const sampleSource = audioContext.createBufferSource();
-      sampleSource.buffer = decodedSamples[1];
-      sampleSource.connect(sampleGainNodes[1]);
-      sampleGainNodes[1].gain.value = 0.4;
-      sampleSource.start();
+          audioTrackSources[count].start();
+          // max, to stop
+        }
+      }
     }
 
-    if (
-      (step % 8 === 4 && Math.round(Math.random() * 10) !== 1) ||
-      Math.round(Math.random() * 40) === 1
-    ) {
-      const sampleSource = audioContext.createBufferSource();
-      sampleSource.buffer = decodedSamples[0];
-      sampleSource.connect(sampleGainNodes[0]);
-      sampleGainNodes[0].gain.value = 0.5;
-      sampleSource.playbackRate.value = Math.random() + 1;
-      sampleSource.start();
-    }
+    // if (s % 2 === 0 || Math.round(Math.random() * 10) === 1) {
+    //   const sampleSource = audioContext.createBufferSource();
+    //   sampleSource.buffer = decodedSamples[1];
+    //   sampleSource.connect(sampleGainNodes[1]);
+    //   sampleGainNodes[1].gain.value = 0.4;
+    //   sampleSource.start();
+    // }
 
-    if (Math.round(Math.random() * 60) === 1) {
-      const sampleSource = audioContext.createBufferSource();
-      sampleSource.buffer = decodedSamples[2];
-      sampleSource.connect(sampleGainNodes[2]);
-      sampleGainNodes[2].gain.value = 0.5;
-      sampleSource.start();
-    }
+    // if (
+    //   (s % 8 === 4 && Math.round(Math.random() * 10) !== 1) ||
+    //   Math.round(Math.random() * 40) === 1
+    // ) {
+    //   const sampleSource = audioContext.createBufferSource();
+    //   sampleSource.buffer = decodedSamples[0];
+    //   sampleSource.connect(sampleGainNodes[0]);
+    //   sampleGainNodes[0].gain.value = 0.5;
+    //   sampleSource.playbackRate.value = Math.random() + 1;
+    //   sampleSource.start();
+    // }
 
-    if (Math.round(Math.random() * 60) === 1) {
-      const sampleSource = audioContext.createBufferSource();
-      sampleSource.buffer = decodedSamples[3];
-      sampleSource.connect(sampleGainNodes[3]);
-      sampleGainNodes[3].gain.value = 0.5;
-      sampleSource.start();
-    }
+    // if (Math.round(Math.random() * 60) === 1) {
+    //   const sampleSource = audioContext.createBufferSource();
+    //   sampleSource.buffer = decodedSamples[2];
+    //   sampleSource.connect(sampleGainNodes[2]);
+    //   sampleGainNodes[2].gain.value = 0.5;
+    //   sampleSource.start();
+    // }
 
-    if (Math.round(Math.random() * 60) === 1) {
-      const sampleSource = audioContext.createBufferSource();
-      sampleSource.buffer = decodedSamples[4];
-      sampleSource.connect(sampleGainNodes[4]);
-      sampleGainNodes[4].gain.value = 0.5;
-      sampleSource.start();
-    }
+    // if (Math.round(Math.random() * 60) === 1) {
+    //   const sampleSource = audioContext.createBufferSource();
+    //   sampleSource.buffer = decodedSamples[3];
+    //   sampleSource.connect(sampleGainNodes[3]);
+    //   sampleGainNodes[3].gain.value = 0.5;
+    //   sampleSource.start();
+    // }
+
+    // if (Math.round(Math.random() * 60) === 1) {
+    //   const sampleSource = audioContext.createBufferSource();
+    //   sampleSource.buffer = decodedSamples[4];
+    //   sampleSource.connect(sampleGainNodes[4]);
+    //   sampleGainNodes[4].gain.value = 0.5;
+    //   sampleSource.start();
+    // }
 
     for (let count = 0; count < schedule.synths.length; count += 1) {
-      if (schedule.synths[count].pattern.length > step) {
-        if (schedule.synths[count].pattern[step].on) {
+      if (schedule.synths[count].pattern.length > s) {
+        if (schedule.synths[count].pattern[s].on) {
           const osc = audioContext.createOscillator();
           const gainNode = audioContext.createGain();
           panNode = !unsupported
             ? audioContext.createStereoPanner()
             : audioContext.createPanner();
           gainNode.gain.value = 0;
-          const { frequency } = schedule.synths[count].pattern[step];
+          const { frequency } = schedule.synths[count].pattern[s];
 
           osc.connect(gainNode);
           gainNode.connect(panNode);
@@ -233,73 +329,17 @@ function handlePlayStep() {
             audioContext.currentTime + 0.15,
             0.5
           );
+
           osc.start();
           numberOfOsc += 1;
-          osc.stop(audioContext.currentTime + 2);
+          osc.stop(audioContext.currentTime + 2.5);
           setTimeout(() => subtract(), 2000);
 
           // osc.onended = () => osc.disconnect();
         }
       }
     }
-  }
-}
-
-function handleSequencerSwitch() {
-  if (!isPlaying) {
-    isPlaying = true;
-    audioContext.resume();
-    // audioContext = !audioContext ? new AudioContext() : audioContext;
-    // clock = !clock ? new WAAClock(audioContext) : clock;
-    masterGainNode = audioContext.createGain();
-    sampleGainNode = audioContext.createGain();
-    wetGain = audioContext.createGain();
-    dryGain = audioContext.createGain();
-    reverbNode = audioContext.createConvolver();
-    reverbNode.buffer = decodedIrs[0];
-    wetGain.connect(reverbNode);
-    reverbNode.connect(masterGainNode);
-    dryGain.connect(masterGainNode);
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 2048;
-    masterGainNode.connect(analyser);
-    for (let i = 0; i < sampleGainNodes.length; i += 1) {
-      sampleGainNodes[i] = audioContext.createGain();
-      sampleGainNodes[i].connect(dryGain);
-      sampleGainNodes[i].connect(wetGain);
-    }
-
-    dryGain.gain.value = 1 - globalReverb;
-    wetGain.gain.value = globalReverb;
-
-    const compressor = audioContext.createDynamicsCompressor();
-    compressor.threshold.setValueAtTime(-10, audioContext.currentTime);
-    compressor.knee.setValueAtTime(10, audioContext.currentTime);
-    compressor.ratio.setValueAtTime(5, audioContext.currentTime);
-    compressor.attack.setValueAtTime(0.1, audioContext.currentTime);
-    compressor.release.setValueAtTime(0.25, audioContext.currentTime);
-    masterGainNode.connect(compressor);
-    compressor.connect(audioContext.destination);
-
-    audioContext.resume();
-    clock.start();
-    clock
-      .callbackAtTime(() => {
-        handlePlayStep();
-      }, 0)
-      .repeat(beatLengthInSeconds);
-    initializeAnalyzer(analyser);
-  } else {
-    masterGainNode.gain.setTargetAtTime(0, audioContext.currentTime, 1);
-    isPlaying = false;
-    step = -1;
-    cancelAnimationFrame(animationRequest);
-    clock.stop();
-    audioContext.suspend();
-    // audioContext.close().then(() => {
-    //   audioContext = new AudioContext();
-    //   clock = new WAAClock(audioContext);
-    // });
+    step += 1;
   }
 }
 

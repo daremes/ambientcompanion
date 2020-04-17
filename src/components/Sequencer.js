@@ -19,7 +19,7 @@ import ICOplay from '../images/play.svg';
 import ICOpause from '../images/pause.svg';
 
 export default function Sequencer({ initGain }) {
-  const [metro, setMetro] = useState(getStep());
+  const [metro, setMetro] = useState(-1);
   const [schedule, setSchedule] = useState(getSchedule());
   const [masterGainNode, setMasterGainNode] = useState(getMasterGainNode());
   const [isPlaying, setIsPlaying] = useState(false);
@@ -62,6 +62,7 @@ export default function Sequencer({ initGain }) {
     console.log('Audio data not yet loaded...');
 
     function tick() {
+      console.log('tick', metro);
       setMetro(metro => metro + 1);
     }
     function onTrigger(e) {
@@ -75,15 +76,19 @@ export default function Sequencer({ initGain }) {
   }, []);
 
   const memoizedHandleReschedule = useCallback(() => {
-    const newPatternLength = getRandomInt(4, 129);
+    let newPatternLength = getRandomInt(4, 64);
+    if (newPatternLength % 2 !== 0) {
+      newPatternLength += 1;
+    }
     const newSchedule = generateSchedule(newPatternLength);
     reSchedule(newSchedule);
     setSchedule(newSchedule);
     setStepCount(newPatternLength);
-    setMetro(getStep);
+    setMetro(-1);
   }, []);
 
   useEffect(() => {
+    console.log(metro % stepCount);
     if (metro % stepCount === stepCount - 1 && infinite) {
       memoizedHandleReschedule();
     }
@@ -95,10 +100,10 @@ export default function Sequencer({ initGain }) {
       setMasterGainNode(getMasterGainNode());
       setIsPlaying(true);
     } else {
-      memoizedHandleReschedule();
+      // memoizedHandleReschedule();
       handleSequencerSwitch();
       setIsPlaying(false);
-      setMetro(-1);
+      // setMetro(0);
     }
   }
 
@@ -129,9 +134,9 @@ export default function Sequencer({ initGain }) {
       >
         by feline astronauts
       </h2>
-      <div style={{ fontSize: '10px' }}>
+      {/* <div style={{ fontSize: '10px' }}>
         <p>Debug | number of active oscillators: {oscCount}</p>
-      </div>
+      </div> */}
       {loaded ? (
         <>
           {/* <div
@@ -177,9 +182,10 @@ export default function Sequencer({ initGain }) {
               />
             </div>
           </div>
+          <div style={{}}>{`Step ${(metro % stepCount) +
+            1} / ${stepCount}`}</div>
           {/* <div style={{ position: 'relative', height: '100px' }}>
-            <div style={{}}>{`Step ${(metro % stepCount) +
-              1} / ${stepCount}`}</div>
+
             {metro > -1 && stepCount > metro % stepCount ? (
               <>
                 {schedule.synths.map((s, index) => (
@@ -214,7 +220,7 @@ export default function Sequencer({ initGain }) {
                 style={{
                   position: 'relative',
                   overflowX: 'auto',
-                  height: '60px',
+                  height: '100px',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -233,11 +239,26 @@ export default function Sequencer({ initGain }) {
                     ))}
                   </div>
                 ))}
+                {schedule.samples.map((sample, index) => (
+                  <div style={{ height: '5px', margin: '3px' }}>
+                    {sample.pattern.map((pattern, i) => (
+                      <div
+                        style={{
+                          display: 'inline-block',
+                          height: '2px',
+                          width: '2px',
+                          marginRight: '1px',
+                          background: pattern.on ? 'red' : 'transparent',
+                        }}
+                      />
+                    ))}
+                  </div>
+                ))}
                 <div
                   style={{
                     position: 'absolute',
                     width: '2px',
-                    height: '45px',
+                    height: '84px',
                     background: 'rgba(0,0,0,0.1)',
                     top: '10px',
                     left: `${(metro % stepCount) * 3 + 3}px`,
