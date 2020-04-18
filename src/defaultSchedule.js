@@ -72,10 +72,10 @@ export function getSynth(patternLength, probability) {
       volume: 0.7,
       noteLength: 0.25,
       envelope: {
-        attack: 0.01,
-        decay: 0.2,
-        sustain: 80,
-        release: 0.1,
+        attack: 0.005,
+        decay: 0.05,
+        sustain: 90,
+        release: 0.3,
       },
     },
     pattern: getPattern(patternLength),
@@ -107,7 +107,7 @@ export function generateSchedule(patternLength, tempo, synthsCount) {
           name: soundFiles.samples[0].name,
           volume: 1,
           reverb: 0.1,
-          pitchShiftLimit: 0.1,
+          pitchShiftLimit: 0,
           muted: 0,
         },
         pattern: getSamplesPattern(patternLength, {

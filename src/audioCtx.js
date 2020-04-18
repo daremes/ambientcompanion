@@ -219,6 +219,7 @@ function handlePlayStep() {
           audioTrackSources[count].buffer = decodedSamples[count];
           audioTrackSources[count].connect(sampleGainNodes[count]);
           if (pitchShiftLimit) {
+            console.log(pitchShiftLimit);
             playbackRate =
               Math.random() * (1 - pitchShiftLimit) + (1 - pitchShiftLimit);
           }
@@ -292,8 +293,8 @@ function handlePlayStep() {
 
           osc.start();
           numberOfOsc += 1;
-          osc.stop(audioContext.currentTime + 2.5);
-          setTimeout(() => subtract(), 2000);
+          osc.stop(audioContext.currentTime + 1.5);
+          // setTimeout(() => subtract(), 1500);
 
           // osc.onended = () => osc.disconnect();
         }
