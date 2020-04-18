@@ -44,7 +44,7 @@ let reverbNode = undefined;
 let isPlaying = false;
 let wetGain = undefined;
 let dryGain = undefined;
-let globalReverb = 0.35;
+let globalReverb = 0;
 let stepperEvent = undefined;
 
 const requestAnimationFrame =
