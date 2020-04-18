@@ -62,7 +62,7 @@ export default function Sequencer({ initGain }) {
     console.log('Audio data not yet loaded...');
 
     function tick() {
-      console.log('tick', metro);
+      // console.log('tick', metro);
       setMetro(metro => metro + 1);
     }
     function onTrigger(e) {
@@ -88,7 +88,7 @@ export default function Sequencer({ initGain }) {
   }, []);
 
   useEffect(() => {
-    console.log(metro % stepCount);
+    // console.log(metro % stepCount);
     if (metro % stepCount === stepCount - 1 && infinite) {
       memoizedHandleReschedule();
     }

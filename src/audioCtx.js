@@ -230,50 +230,6 @@ function handlePlayStep() {
       }
     }
 
-    // if (s % 2 === 0 || Math.round(Math.random() * 10) === 1) {
-    //   const sampleSource = audioContext.createBufferSource();
-    //   sampleSource.buffer = decodedSamples[1];
-    //   sampleSource.connect(sampleGainNodes[1]);
-    //   sampleGainNodes[1].gain.value = 0.4;
-    //   sampleSource.start();
-    // }
-
-    // if (
-    //   (s % 8 === 4 && Math.round(Math.random() * 10) !== 1) ||
-    //   Math.round(Math.random() * 40) === 1
-    // ) {
-    //   const sampleSource = audioContext.createBufferSource();
-    //   sampleSource.buffer = decodedSamples[0];
-    //   sampleSource.connect(sampleGainNodes[0]);
-    //   sampleGainNodes[0].gain.value = 0.5;
-    //   sampleSource.playbackRate.value = Math.random() + 1;
-    //   sampleSource.start();
-    // }
-
-    // if (Math.round(Math.random() * 60) === 1) {
-    //   const sampleSource = audioContext.createBufferSource();
-    //   sampleSource.buffer = decodedSamples[2];
-    //   sampleSource.connect(sampleGainNodes[2]);
-    //   sampleGainNodes[2].gain.value = 0.5;
-    //   sampleSource.start();
-    // }
-
-    // if (Math.round(Math.random() * 60) === 1) {
-    //   const sampleSource = audioContext.createBufferSource();
-    //   sampleSource.buffer = decodedSamples[3];
-    //   sampleSource.connect(sampleGainNodes[3]);
-    //   sampleGainNodes[3].gain.value = 0.5;
-    //   sampleSource.start();
-    // }
-
-    // if (Math.round(Math.random() * 60) === 1) {
-    //   const sampleSource = audioContext.createBufferSource();
-    //   sampleSource.buffer = decodedSamples[4];
-    //   sampleSource.connect(sampleGainNodes[4]);
-    //   sampleGainNodes[4].gain.value = 0.5;
-    //   sampleSource.start();
-    // }
-
     for (let count = 0; count < schedule.synths.length; count += 1) {
       if (schedule.synths[count].pattern.length > s) {
         if (schedule.synths[count].pattern[s].on) {
@@ -282,7 +238,6 @@ function handlePlayStep() {
           panNode = !unsupported
             ? audioContext.createStereoPanner()
             : audioContext.createPanner();
-          gainNode.gain.value = 0;
           const { frequency } = schedule.synths[count].pattern[s];
 
           osc.connect(gainNode);
@@ -306,28 +261,33 @@ function handlePlayStep() {
             //   0.5
             // );
           } else {
-            const pan = frequency > 120 ? getRandomArbitrary(-1, 1) : 0;
+            const pan = frequency > 200 ? getRandomArbitrary(-1, 1) : 0;
             panNode.panningModel = 'equalpower';
             panNode.setPosition(pan, 0, 1 - Math.abs(pan));
           }
 
-          const dynamics = Math.random() * 0.2 + 0.05;
+          const { volume, envelope, noteLength } = schedule.synths[
+            count
+          ].instrument;
+          const { attack, decay, sustain, release } = envelope;
+          const dynamics = (Math.random() * (50 * volume)) / 100;
+          const now = audioContext.currentTime;
 
+          gainNode.gain.setValueAtTime(0, now);
+          gainNode.gain.setTargetAtTime(volume - dynamics, now, attack);
           gainNode.gain.setTargetAtTime(
-            dynamics,
-            audioContext.currentTime,
-            0.005
+            (volume - dynamics * sustain) / 100,
+            now + attack,
+            decay
           );
-
-          gainNode.gain.setTargetAtTime(
-            0.05,
-            audioContext.currentTime + 0.1,
-            0.01
-          );
+          // gainNode.gain.setValueAtTime(
+          //   (volume * sustain) / 100,
+          //   now + attack + decay
+          // );
           gainNode.gain.setTargetAtTime(
             0,
-            audioContext.currentTime + 0.15,
-            0.5
+            now + attack + decay + noteLength * beatLengthInSeconds,
+            release
           );
 
           osc.start();

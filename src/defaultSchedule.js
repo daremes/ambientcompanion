@@ -69,12 +69,12 @@ export function getSynth(patternLength, probability) {
       voices: 1,
       oscType: 'sine',
       muted: 0,
-      volume: 0.5,
-      noteLength: 2,
+      volume: 0.7,
+      noteLength: 0.25,
       envelope: {
-        attack: 0.1,
+        attack: 0.01,
         decay: 0.2,
-        sustain: 0.5,
+        sustain: 80,
         release: 0.1,
       },
     },
@@ -91,7 +91,7 @@ export function generateSchedule(patternLength, tempo, synthsCount) {
     tempo = 120;
   }
   if (!synthsCount) {
-    synthsCount = 3;
+    synthsCount = 4;
   }
   if (patternLength % 2 !== 0) {
     patternLength = patternLength + 1;
