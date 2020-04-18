@@ -230,7 +230,7 @@ function handlePlayStep() {
       }
     }
 
-    for (let count = 0; count < schedule.synths.length; count += 1) {
+    for (let count = 0; count < 0; count += 1) {
       if (schedule.synths[count].pattern.length > s) {
         if (schedule.synths[count].pattern[s].on) {
           const osc = audioContext.createOscillator();
