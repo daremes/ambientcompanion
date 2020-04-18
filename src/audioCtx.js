@@ -219,7 +219,6 @@ function handlePlayStep() {
           audioTrackSources[count].buffer = decodedSamples[count];
           audioTrackSources[count].connect(sampleGainNodes[count]);
           if (pitchShiftLimit) {
-            console.log(pitchShiftLimit);
             playbackRate =
               Math.random() * (1 - pitchShiftLimit) + (1 - pitchShiftLimit);
           }
@@ -251,21 +250,20 @@ function handlePlayStep() {
           osc.type = schedule.synths[count].instrument.oscType;
           osc.frequency.setValueAtTime(frequency, audioContext.currentTime);
 
-          if (!unsupported) {
-            panNode.pan.setValueAtTime(
-              frequency > 120 ? getRandomArbitrary(-1, 1) : 0,
-              audioContext.currentTime
-            );
-            // panNode.pan.setTargetAtTime(
-            //   getRandomArbitrary(-1, 1),
-            //   audioContext.currentTime + 0.1,
-            //   0.5
-            // );
-          } else {
-            const pan = frequency > 200 ? getRandomArbitrary(-1, 1) : 0;
-            panNode.panningModel = 'equalpower';
-            panNode.setPosition(pan, 0, 1 - Math.abs(pan));
-          }
+          panNode.pan.setValueAtTime(
+            frequency > 120 ? getRandomArbitrary(-1, 1) : 0,
+            audioContext.currentTime
+          );
+
+          // panNode.pan.setTargetAtTime(
+          //   getRandomArbitrary(-1, 1),
+          //   audioContext.currentTime + 0.1,
+          //   0.5
+          // );
+
+          // const pan = frequency > 200 ? getRandomArbitrary(-1, 1) : 0;
+          // panNode.panningModel = 'equalpower';
+          // panNode.setPosition(pan, 0, 1 - Math.abs(pan));
 
           const { volume, envelope, noteLength } = schedule.synths[
             count
