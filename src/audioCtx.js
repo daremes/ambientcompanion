@@ -44,7 +44,7 @@ let reverbNode = undefined;
 let isPlaying = false;
 let wetGain = undefined;
 let dryGain = undefined;
-let globalReverb = 0;
+let globalReverb = 0.35;
 let stepperEvent = undefined;
 
 const requestAnimationFrame =
@@ -148,7 +148,7 @@ function onResume() {
   wetGain = audioContext.createGain();
   dryGain = audioContext.createGain();
   reverbNode = audioContext.createConvolver();
-  reverbNode.buffer = decodedIrs[0];
+  reverbNode.buffer = decodedIrs[1];
   wetGain.connect(reverbNode);
   reverbNode.connect(masterGainNode);
   dryGain.connect(masterGainNode);
