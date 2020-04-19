@@ -46,7 +46,7 @@ let reverbNode = undefined;
 let isPlaying = false;
 let wetGain = undefined;
 let dryGain = undefined;
-let globalReverb = 0.15;
+let globalReverb = 0.25;
 let stepperEvent = undefined;
 
 const requestAnimationFrame =
@@ -275,7 +275,6 @@ function handlePlayStep() {
           const { attack, decay, sustain, release } = envelope;
           const dynamics = (Math.random() * 50 * volume) / 100;
           const now = audioContext.currentTime;
-
           gainNode.gain.setValueAtTime(0, now);
           gainNode.gain.setTargetAtTime(volume - dynamics, now, attack);
           gainNode.gain.setTargetAtTime(
