@@ -37,7 +37,6 @@ let tempo = defaultSchedule.tempo;
 let beatLengthInSeconds = 1 / (tempo / 60);
 console.log(beatLengthInSeconds);
 let masterGainNode = undefined;
-let panNode = undefined;
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioContext = new AudioContext();
 audioContext.suspend();
@@ -46,7 +45,7 @@ let reverbNode = undefined;
 let isPlaying = false;
 let wetGain = undefined;
 let dryGain = undefined;
-let globalReverb = 0.25;
+let globalReverb = 0;
 let stepperEvent = undefined;
 
 const requestAnimationFrame =
@@ -157,8 +156,6 @@ function onResume() {
   dryGain.connect(masterGainNode);
   const analyser = audioContext.createAnalyser();
   analyser.fftSize = 2048;
-  const samplesAuxGain = audioContext.createGain();
-  samplesAuxGain.connect(dryGain);
 
   masterGainNode.connect(analyser);
 
@@ -183,7 +180,7 @@ function onResume() {
   compressor.threshold.setValueAtTime(-10, audioContext.currentTime);
   compressor.knee.setValueAtTime(10, audioContext.currentTime);
   compressor.ratio.setValueAtTime(5, audioContext.currentTime);
-  compressor.attack.setValueAtTime(0.1, audioContext.currentTime);
+  compressor.attack.setValueAtTime(0.2, audioContext.currentTime);
   compressor.release.setValueAtTime(0.25, audioContext.currentTime);
   masterGainNode.connect(compressor);
   compressor.connect(audioContext.destination);
@@ -238,10 +235,11 @@ function handlePlayStep() {
         if (schedule.synths[count].pattern[s].on) {
           const osc = audioContext.createOscillator();
           const gainNode = audioContext.createGain();
-          panNode = audioContext.createPanner();
-          // panNode = !unsupported
-          //   ? audioContext.createStereoPanner()
-          //   : audioContext.createPanner();
+
+          const panNode = !unsupported
+            ? audioContext.createStereoPanner()
+            : audioContext.createPanner();
+
           const { frequency } = schedule.synths[count].pattern[s];
 
           osc.connect(gainNode);
@@ -252,54 +250,58 @@ function handlePlayStep() {
           // schedule.synths[count].instrument.reverbRatio;
 
           osc.type = schedule.synths[count].instrument.oscType;
-          osc.frequency.setValueAtTime(frequency, audioContext.currentTime);
-
-          // panNode.pan.setValueAtTime(
-          //   frequency > 120 ? getRandomArbitrary(-1, 1) : 0,
-          //   audioContext.currentTime
-          // );
-
-          // panNode.pan.setTargetAtTime(
-          //   getRandomArbitrary(-1, 1),
-          //   audioContext.currentTime + 0.1,
-          //   0.5
-          // );
-
+          osc.frequency.value = frequency;
           const pan = frequency > 200 ? getRandomArbitrary(-1, 1) : 0;
-          panNode.panningModel = 'equalpower';
-          panNode.setPosition(pan, 0, 1 - Math.abs(pan));
+
+          if (!unsupported) {
+            panNode.pan.setValueAtTime(pan, audioContext.currentTime);
+          } else {
+            panNode.panningModel = 'equalpower';
+            panNode.setPosition(pan, 0, 1 - Math.abs(pan));
+          }
 
           const { volume, envelope, noteLength } = schedule.synths[
             count
           ].instrument;
           const { attack, decay, sustain, release } = envelope;
           const dynamics = (Math.random() * 50 * volume) / 100;
-          const now = audioContext.currentTime;
-          gainNode.gain.setValueAtTime(0, now);
-          gainNode.gain.setTargetAtTime(volume - dynamics, now, attack);
-          gainNode.gain.setTargetAtTime(
-            ((volume - dynamics) * sustain) / 100,
-            now + attack * 5,
-            decay
-          );
-          // gainNode.gain.setValueAtTime(
-          //   (volume * sustain) / 100,
-          //   now + attack + decay
-          // );
-          gainNode.gain.setTargetAtTime(
-            0,
-            now + attack + decay + noteLength * beatLengthInSeconds,
-            release
-          );
+          let humanize = count * 0.01;
+          const now = audioContext.currentTime + humanize;
+          const sustainLevel = ((volume - dynamics) * sustain) / 100;
+          const timeToStartDecay = now + attack * 5;
+          const noteLengthInSeconds = noteLength * beatLengthInSeconds;
+          const timeToStartRelease =
+            now + attack * 5 + decay * 5 + noteLengthInSeconds;
 
-          osc.start();
+          // gainNode.gain.setTargetAtTime(0, now, 0); not working in safari
+          gainNode.gain.value = 0;
+
+          gainNode.gain.setTargetAtTime(volume - dynamics, now, attack);
+
+          gainNode.gain.setTargetAtTime(sustainLevel, timeToStartDecay, decay);
+
+          gainNode.gain.setTargetAtTime(0, timeToStartRelease, release);
+
+          osc.start(now);
+
           const stopTime =
             noteLength * beatLengthInSeconds +
             attack * 5 +
             decay * 5 +
             release * 5;
+
           // numberOfOsc += 1;
-          osc.stop(audioContext.currentTime + stopTime);
+          // console.log(
+          //   `now: ${now}, volume: ${volume}, dynamicVolume: ${volume -
+          //     dynamics}, sustainLevel: ${sustainLevel},
+          //     attack: ${attack}, timeToStartDecay: ${timeToStartDecay},
+          //     timeToStartRelease: ${timeToStartRelease},
+          //     noteLength: ${noteLength}, noteLengthInSeconds: ${noteLengthInSeconds},
+          //     beatLengthInSeconds: ${beatLengthInSeconds},
+          //     stopTime: ${now + stopTime}
+          // `
+          // );
+          osc.stop(now + stopTime);
           // setTimeout(() => subtract(), 1500);
 
           // osc.onended = () => osc.disconnect();

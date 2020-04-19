@@ -73,12 +73,12 @@ export function getSynth(patternLength, synthType) {
       voices: 1,
       oscType: synthType ? synthType : 'sine',
       muted: 0,
-      volume: 0.3,
+      volume: 0.1,
       noteLength: 0.25,
       envelope: {
         attack: 0.005,
-        decay: 0.05,
-        sustain: 90,
+        decay: 0.01,
+        sustain: 70,
         release: 0.3,
       },
     },
@@ -97,7 +97,7 @@ export function generateSchedule(
     patternLength = 32;
   }
   if (!tempo) {
-    tempo = 120;
+    tempo = 124;
   }
   if (!synthsCount) {
     synthsCount = 5;
@@ -173,13 +173,13 @@ export function generateSchedule(
           track: 4,
           name: soundFiles.samples[4].name,
           volume: 0.5,
-          reverb: 1,
+          reverb: 0.3,
           pitchShiftLimit: 0,
           muted: 0,
         },
         pattern: getSamplesPattern(patternLength, {
           mode: 'random',
-          factor: 2,
+          factor: 3,
         }),
       },
     ],
