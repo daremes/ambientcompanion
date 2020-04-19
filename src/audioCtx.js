@@ -46,7 +46,7 @@ let reverbNode = undefined;
 let isPlaying = false;
 let wetGain = undefined;
 let dryGain = undefined;
-let globalReverb = 0.35;
+let globalReverb = 0.15;
 let stepperEvent = undefined;
 
 const requestAnimationFrame =
@@ -238,9 +238,10 @@ function handlePlayStep() {
         if (schedule.synths[count].pattern[s].on) {
           const osc = audioContext.createOscillator();
           const gainNode = audioContext.createGain();
-          panNode = !unsupported
-            ? audioContext.createStereoPanner()
-            : audioContext.createPanner();
+          panNode = audioContext.createPanner();
+          // panNode = !unsupported
+          //   ? audioContext.createStereoPanner()
+          //   : audioContext.createPanner();
           const { frequency } = schedule.synths[count].pattern[s];
 
           osc.connect(gainNode);
@@ -253,10 +254,10 @@ function handlePlayStep() {
           osc.type = schedule.synths[count].instrument.oscType;
           osc.frequency.setValueAtTime(frequency, audioContext.currentTime);
 
-          panNode.pan.setValueAtTime(
-            frequency > 120 ? getRandomArbitrary(-1, 1) : 0,
-            audioContext.currentTime
-          );
+          // panNode.pan.setValueAtTime(
+          //   frequency > 120 ? getRandomArbitrary(-1, 1) : 0,
+          //   audioContext.currentTime
+          // );
 
           // panNode.pan.setTargetAtTime(
           //   getRandomArbitrary(-1, 1),
@@ -264,9 +265,9 @@ function handlePlayStep() {
           //   0.5
           // );
 
-          // const pan = frequency > 200 ? getRandomArbitrary(-1, 1) : 0;
-          // panNode.panningModel = 'equalpower';
-          // panNode.setPosition(pan, 0, 1 - Math.abs(pan));
+          const pan = frequency > 200 ? getRandomArbitrary(-1, 1) : 0;
+          panNode.panningModel = 'equalpower';
+          panNode.setPosition(pan, 0, 1 - Math.abs(pan));
 
           const { volume, envelope, noteLength } = schedule.synths[
             count
