@@ -214,7 +214,7 @@ export default function Sequencer({ initGain }) {
             ) : null}
           </div> */}
           {/* <div style={{}}>Pattern</div> */}
-          <PatternWrapper>
+          {/* <PatternWrapper>
             {stepCount > metro % stepCount ? (
               <div
                 style={{
@@ -266,7 +266,10 @@ export default function Sequencer({ initGain }) {
                 />
               </div>
             ) : null}
-          </PatternWrapper>
+          </PatternWrapper> */}
+          <CanvasWrapper>
+            <CanvasStepper id='stepper' />
+          </CanvasWrapper>
           <CanvasWrapper>
             <Canvas id='oscilloscope' />
           </CanvasWrapper>
@@ -304,6 +307,11 @@ const Canvas = styled.canvas`
   width: 200px;
   height: 80px;
   border-radius: 70px;
+`;
+
+const CanvasStepper = styled.canvas`
+  width: 200px;
+  height: 80px;
 `;
 
 const CanvasWrapper = styled.div`

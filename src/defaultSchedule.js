@@ -36,7 +36,7 @@ export function getPattern(patternLength, probability) {
 
 export function getSamplesPattern(patternLength, m) {
   const arr = [];
-  const { mode, factor, time } = m;
+  const { mode, factor, time, withRandomFactor } = m;
   for (let i = 0; i < patternLength; i += 1) {
     let on = false;
     const frequency = getRandomTone();
@@ -45,6 +45,9 @@ export function getSamplesPattern(patternLength, m) {
     }
     if (mode === 'fixed') {
       on = i % time === 0;
+      if (withRandomFactor && on) {
+        on = Math.random() >= 1 - withRandomFactor / 100;
+      }
     }
     const newStep = {
       on,
@@ -55,21 +58,22 @@ export function getSamplesPattern(patternLength, m) {
   return arr;
 }
 
-export function getSynths(patternLength, tempo, synthsCount) {
+export function getSynths(patternLength, synthsCount) {
   const arr = [];
   for (let i = 0; i < synthsCount; i += 1) {
-    arr.push(getSynth(patternLength, tempo));
+    const synthType = Math.random() >= 0.9 ? 'triangle' : 'sine';
+    arr.push(getSynth(patternLength, synthType));
   }
   return arr;
 }
 
-export function getSynth(patternLength, probability) {
+export function getSynth(patternLength, synthType) {
   const obj = {
     instrument: {
       voices: 1,
-      oscType: 'sine',
+      oscType: synthType ? synthType : 'sine',
       muted: 0,
-      volume: 0.7,
+      volume: 0.3,
       noteLength: 0.25,
       envelope: {
         attack: 0.005,
@@ -83,7 +87,12 @@ export function getSynth(patternLength, probability) {
   return obj;
 }
 
-export function generateSchedule(patternLength, tempo, synthsCount) {
+export function generateSchedule(
+  patternLength,
+  tempo,
+  synthsCount,
+  lessBusyFactor
+) {
   if (!patternLength) {
     patternLength = 32;
   }
@@ -91,21 +100,22 @@ export function generateSchedule(patternLength, tempo, synthsCount) {
     tempo = 120;
   }
   if (!synthsCount) {
-    synthsCount = 4;
+    synthsCount = 5;
   }
   if (patternLength % 2 !== 0) {
     patternLength = patternLength + 1;
   }
+
   return {
     patternLength,
     tempo,
-    synths: getSynths(patternLength, tempo, synthsCount),
+    synths: getSynths(patternLength, synthsCount),
     samples: [
       {
         instrument: {
           track: 0,
           name: soundFiles.samples[0].name,
-          volume: 1,
+          volume: 0.5,
           reverb: 0.1,
           pitchShiftLimit: 0,
           muted: 0,
@@ -113,7 +123,7 @@ export function generateSchedule(patternLength, tempo, synthsCount) {
         pattern: getSamplesPattern(patternLength, {
           mode: 'fixed',
           time: 2,
-          withRandomFactor: 25,
+          withRandomFactor: 80,
         }),
       },
       {
@@ -141,7 +151,7 @@ export function generateSchedule(patternLength, tempo, synthsCount) {
         },
         pattern: getSamplesPattern(patternLength, {
           mode: 'random',
-          factor: 10,
+          factor: 1,
         }),
       },
       {
@@ -155,7 +165,7 @@ export function generateSchedule(patternLength, tempo, synthsCount) {
         },
         pattern: getSamplesPattern(patternLength, {
           mode: 'random',
-          factor: 5,
+          factor: 1,
         }),
       },
       {

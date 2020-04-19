@@ -6,12 +6,6 @@ export default {
       description: '',
       type: '',
     },
-    {
-      fileName: 'IR-2.m4a',
-      name: 'IR2',
-      description: '',
-      type: '',
-    },
   ],
   samples: [
     {

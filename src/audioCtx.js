@@ -3,6 +3,7 @@ import changeNodeVolume from './changeNodeVolume';
 import defaultSchedule, {
   generateSchedule,
   getRandomArbitrary,
+  getRandomInt,
 } from './defaultSchedule';
 import soundFiles from './soundFiles';
 
@@ -30,6 +31,7 @@ const unsupported = iOS || safari;
 
 let step = 0;
 let schedule = defaultSchedule;
+let previousSchedule = {};
 let stepCount = defaultSchedule.patternLength;
 let tempo = defaultSchedule.tempo;
 let beatLengthInSeconds = 1 / (tempo / 60);
@@ -59,6 +61,7 @@ const cancelAnimationFrame =
 let animationRequest = undefined;
 
 function reSchedule(newSchedule) {
+  previousSchedule = { ...schedule };
   schedule = { ...newSchedule };
   stepCount = newSchedule.patternLength;
   step = 0;
@@ -230,7 +233,7 @@ function handlePlayStep() {
       }
     }
 
-    for (let count = 0; count < 0; count += 1) {
+    for (let count = 0; count < schedule.synths.length; count += 1) {
       if (schedule.synths[count].pattern.length > s) {
         if (schedule.synths[count].pattern[s].on) {
           const osc = audioContext.createOscillator();
@@ -269,13 +272,13 @@ function handlePlayStep() {
             count
           ].instrument;
           const { attack, decay, sustain, release } = envelope;
-          const dynamics = (Math.random() * (50 * volume)) / 100;
+          const dynamics = (Math.random() * 50 * volume) / 100;
           const now = audioContext.currentTime;
 
           gainNode.gain.setValueAtTime(0, now);
           gainNode.gain.setTargetAtTime(volume - dynamics, now, attack);
           gainNode.gain.setTargetAtTime(
-            (volume - dynamics * sustain) / 100,
+            ((volume - dynamics) * sustain) / 100,
             now + attack,
             decay
           );
@@ -290,8 +293,13 @@ function handlePlayStep() {
           );
 
           osc.start();
-          numberOfOsc += 1;
-          osc.stop(audioContext.currentTime + 1.5);
+          const stopTime =
+            noteLength * beatLengthInSeconds +
+            attack * 5 +
+            decay * 5 +
+            release * 5;
+          // numberOfOsc += 1;
+          osc.stop(audioContext.currentTime + stopTime);
           // setTimeout(() => subtract(), 1500);
 
           // osc.onended = () => osc.disconnect();
@@ -303,8 +311,10 @@ function handlePlayStep() {
 }
 
 function initializeAnalyzer(analyser) {
-  const canvas = document.getElementById('oscilloscope');
-  const canvasCtx = canvas.getContext('2d');
+  const oCanvas = document.getElementById('oscilloscope');
+  const sCanvas = document.getElementById('stepper');
+  const oCanvasCtx = oCanvas.getContext('2d');
+  const sCanvasCtx = sCanvas.getContext('2d');
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
 
@@ -313,32 +323,53 @@ function initializeAnalyzer(analyser) {
 
     analyser.getByteTimeDomainData(dataArray);
 
-    canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-    canvasCtx.strokeStyle = 'rgb(0, 0, 0, 0.3';
+    oCanvasCtx.clearRect(0, 0, oCanvas.width, oCanvas.height);
+    sCanvasCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
 
-    canvasCtx.lineWidth = 2;
+    oCanvasCtx.strokeStyle = 'rgb(0, 0, 0, 0.3)';
 
-    canvasCtx.beginPath();
+    oCanvasCtx.lineWidth = 2;
 
-    const sliceWidth = (canvas.width * 1.0) / bufferLength;
+    oCanvasCtx.beginPath();
+
+    const sliceWidth = (oCanvas.width * 1.0) / bufferLength;
 
     let x = 0;
 
     for (let i = 0; i < bufferLength; i++) {
       const v = dataArray[i] / 128.0;
-      const y = (v - 1.0) * 2.0 * canvas.height + canvas.height / 2;
+      const y = (v - 1.0) * 2.0 * oCanvas.height + oCanvas.height / 2;
       // console.log(v);
 
       if (i === 0) {
-        canvasCtx.moveTo(x, y);
+        oCanvasCtx.moveTo(x, y);
       } else {
-        canvasCtx.lineTo(x, y);
+        oCanvasCtx.lineTo(x, y);
       }
       x += sliceWidth;
     }
 
-    canvasCtx.lineTo(canvas.width, canvas.height / 2);
-    canvasCtx.stroke();
+    oCanvasCtx.lineTo(oCanvas.width, oCanvas.height / 2);
+    oCanvasCtx.stroke();
+
+    sCanvasCtx.fillStyle = 'rgb(0, 0, 0, 0.3)';
+    sCanvasCtx.font = '30px Helvetica';
+    sCanvasCtx.textAlign = 'center';
+    sCanvasCtx.fillRect(sCanvas.width / 2 - 5, 0, 5, sCanvas.height);
+
+    for (let l = 0; l < schedule.patternLength; l += 1) {
+      for (let i = 0; i < schedule.synths.length; i += 1) {
+        if (schedule.synths[i].pattern[l].on) {
+          // sCanvasCtx.fillStyle = `rgb(0, 0, 0, ${0.3})`;
+          sCanvasCtx.fillRect(
+            sCanvas.width / 2 + l * 10 + 5 - (step % stepCount) * 10,
+            i * 10 + 5,
+            5,
+            5
+          );
+        }
+      }
+    }
   }
   draw();
 }
