@@ -1,7 +1,8 @@
 @font-face {
-  font-family: "Finalnew";
+  font-family: 'Finalnew';
   src:
-    url(/Finalnew.ttf) format("truetype");
+    /* url(/Finalnew.ttf) format("truetype"); */ url(/FuckinGwenhwyfar.ttf)
+    format('truetype');
 }
 
 h1,
@@ -10,5 +11,5 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Finalnew", Fallback, sans-serif !important;
+  font-family: 'Finalnew', Fallback, sans-serif !important;
 }

@@ -279,7 +279,7 @@ function handlePlayStep() {
           gainNode.gain.setTargetAtTime(volume - dynamics, now, attack);
           gainNode.gain.setTargetAtTime(
             ((volume - dynamics) * sustain) / 100,
-            now + attack,
+            now + attack * 5,
             decay
           );
           // gainNode.gain.setValueAtTime(
@@ -313,10 +313,15 @@ function handlePlayStep() {
 function initializeAnalyzer(analyser) {
   const oCanvas = document.getElementById('oscilloscope');
   const sCanvas = document.getElementById('stepper');
+  sCanvas.width = sCanvas.offsetWidth;
+  sCanvas.height = sCanvas.offsetHeight;
+  oCanvas.width = oCanvas.offsetWidth;
+  oCanvas.height = oCanvas.offsetHeight;
   const oCanvasCtx = oCanvas.getContext('2d');
   const sCanvasCtx = sCanvas.getContext('2d');
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
+  console.log(sCanvas.height);
 
   function draw() {
     animationRequest = requestAnimationFrame(draw);
@@ -352,18 +357,39 @@ function initializeAnalyzer(analyser) {
     oCanvasCtx.lineTo(oCanvas.width, oCanvas.height / 2);
     oCanvasCtx.stroke();
 
-    sCanvasCtx.fillStyle = 'rgb(0, 0, 0, 0.3)';
-    sCanvasCtx.font = '30px Helvetica';
+    sCanvasCtx.fillStyle = 'rgb(0, 0, 0, 0.2)';
     sCanvasCtx.textAlign = 'center';
     sCanvasCtx.fillRect(sCanvas.width / 2 - 5, 0, 5, sCanvas.height);
-
     for (let l = 0; l < schedule.patternLength; l += 1) {
       for (let i = 0; i < schedule.synths.length; i += 1) {
         if (schedule.synths[i].pattern[l].on) {
-          // sCanvasCtx.fillStyle = `rgb(0, 0, 0, ${0.3})`;
+          if (l === (step % stepCount) - 1) {
+            sCanvasCtx.fillStyle = `#f50057`;
+          } else if (l > (step % stepCount) - 1) {
+            sCanvasCtx.fillStyle = `#3f51b5`;
+          } else {
+            sCanvasCtx.fillStyle = `rgb(0, 0, 0, ${0.3})`;
+          }
           sCanvasCtx.fillRect(
             sCanvas.width / 2 + l * 10 + 5 - (step % stepCount) * 10,
-            i * 10 + 5,
+            i * 10,
+            5,
+            5
+          );
+        }
+      }
+      for (let i = 0; i < schedule.samples.length; i += 1) {
+        if (schedule.samples[i].pattern[l].on) {
+          if (l === (step % stepCount) - 1) {
+            sCanvasCtx.fillStyle = `#f50057`;
+          } else if (l > (step % stepCount) - 1) {
+            sCanvasCtx.fillStyle = `#3fb5a3`;
+          } else {
+            sCanvasCtx.fillStyle = `rgb(0, 0, 0, ${0.3})`;
+          }
+          sCanvasCtx.fillRect(
+            sCanvas.width / 2 + l * 10 + 5 - (step % stepCount) * 10,
+            i * 10 + schedule.synths.length * 10,
             5,
             5
           );

@@ -112,13 +112,15 @@ export default function Sequencer({ initGain }) {
       style={{
         display: 'block',
         width: '360px',
+        boxShadow: '0px 0px 5px 0px rgba(214,214,214,1)',
+        padding: '8px',
       }}
     >
       <h1
         style={{
           fontSize: '28px',
           marginBlockEnd: '0',
-          marginBlockStart: '12px',
+          marginBlockStart: '0px',
         }}
       >
         AmbientCompanion
@@ -152,10 +154,10 @@ export default function Sequencer({ initGain }) {
           >
             <img src={ICOplay} alt='.' />
           </div> */}
-          <div style={{ marginBottom: '8px' }}>
+          <div style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <Button
-                variant={!isPlaying ? 'contained' : 'outlined'}
+                variant={!isPlaying ? 'contained' : 'default'}
                 color='primary'
                 onClick={() => switchPlay()}
               >
@@ -168,22 +170,23 @@ export default function Sequencer({ initGain }) {
               <Button
                 variant='text'
                 color='secondary'
+                disabled={!isPlaying}
                 onClick={() => memoizedHandleReschedule()}
               >
-                RESCHEDULE
+                REGENERATE
               </Button>
             </div>
             {/* <div>sample rate: {sr}</div> */}
-            <div style={{ width: '100%', maxWidth: '360px' }}>
+            {/* <div style={{ width: '100%', maxWidth: '360px' }}>
               <VolumeSlider
                 initGain={0.5}
                 gainNode={masterGainNode}
                 name='Master volume'
               />
-            </div>
+            </div> */}
           </div>
-          <div style={{}}>{`Step ${(metro % stepCount) +
-            1} / ${stepCount}`}</div>
+          {/* <div style={{}}>{`Step ${(metro % stepCount) +
+            1} / ${stepCount}`}</div> */}
           {/* <div style={{ position: 'relative', height: '100px' }}>
 
             {metro > -1 && stepCount > metro % stepCount ? (
@@ -304,14 +307,17 @@ const LoaderContainer = styled.div`
 `;
 
 const Canvas = styled.canvas`
-  width: 200px;
+  width: 90%;
   height: 80px;
-  border-radius: 70px;
+  box-shadow: 0px 0px 5px 0px rgba(214, 214, 214, 1);
+  border-radius: 5px;
 `;
 
 const CanvasStepper = styled.canvas`
-  width: 200px;
-  height: 80px;
+  width: 90%;
+  height: 95px;
+  box-shadow: 0px 0px 5px 0px rgba(214, 214, 214, 1);
+  border-radius: 5px;
 `;
 
 const CanvasWrapper = styled.div`
