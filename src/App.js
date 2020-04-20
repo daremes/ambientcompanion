@@ -1,24 +1,48 @@
 import React from 'react';
+import {
+  Route,
+  BrowserRouter as Router,
+  Link,
+  // useRouteMatch,
+} from 'react-router-dom';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core/styles';
+import styled from 'styled-components';
 import './fonts.css';
 //
-import Sequencer from './components/Sequencer';
+import NavBar from './components/NavBar';
+import Home from './components/Home';
+import AmbientCompanion from './components/AmbientCompanion';
 
 const theme = createMuiTheme({});
 
 function App() {
   return (
-    <React.Fragment>
+    <Router>
       <CssBaseline />
       <ThemeProvider theme={theme}>
-        <div style={{ display: 'flex', margin: '8px' }}>
-          <Sequencer initGain={0.2} />
-        </div>
+        <NavBar />
+        <DefaultLayout>
+          <Route exact path='/'>
+            <Home />
+          </Route>
+          <Route path='/ambientcompanion'>
+            <AmbientCompanion initGain={0.2} />
+          </Route>
+        </DefaultLayout>
       </ThemeProvider>
-    </React.Fragment>
+    </Router>
   );
 }
 
 export default App;
+
+const DefaultLayout = styled.div`
+  display: flex;
+  margin: 16px;
+  justify-content: center;
+  @media (max-width: 768px) {
+    margin: 4px 4px;
+  }
+`;

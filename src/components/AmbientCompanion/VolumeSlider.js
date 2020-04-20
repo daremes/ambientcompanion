@@ -7,17 +7,8 @@ import Card from '@material-ui/core/Card';
 import VolumeDown from '@material-ui/icons/VolumeDown';
 import VolumeUp from '@material-ui/icons/VolumeUp';
 //
-import {
-  reSchedule,
-  getSchedule,
-  handleSequencerSwitch,
-  getMasterGainNode,
-  getStepCount,
-  getStep,
-  getSampleRate,
-  getAudioContext,
-} from '../audioCtx';
-import changeNodeVolume from '../changeNodeVolume';
+import { getAudioContext } from './audioCtx';
+import changeNodeVolume from './changeNodeVolume';
 
 const useStyles = makeStyles({
   root: {

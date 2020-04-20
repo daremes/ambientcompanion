@@ -19,10 +19,10 @@ let sampleWetNodes = new Array(defaultSchedule.samples.length);
 
 const { irs, samples } = soundFiles;
 irs.forEach((ir, index) => {
-  irSources[index] = require(`./sounds/${ir.fileName}`);
+  irSources[index] = require(`../../sounds/${ir.fileName}`);
 });
 samples.forEach((sample, index) => {
-  sampleSources[index] = require(`./sounds/${sample.fileName}`);
+  sampleSources[index] = require(`../../sounds/${sample.fileName}`);
 });
 
 const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -30,8 +30,7 @@ const safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 const unsupported = iOS || safari;
 
 let step = 0;
-let schedule = defaultSchedule;
-let previousSchedule = {};
+let schedule = { ...defaultSchedule };
 let stepCount = defaultSchedule.patternLength;
 let tempo = defaultSchedule.tempo;
 let beatLengthInSeconds = 1 / (tempo / 60);
@@ -61,7 +60,6 @@ const cancelAnimationFrame =
 let animationRequest = undefined;
 
 function reSchedule(newSchedule) {
-  previousSchedule = { ...schedule };
   schedule = { ...newSchedule };
   stepCount = newSchedule.patternLength;
   justReseted = true;
@@ -325,6 +323,8 @@ function initializeAnalyzer(analyser) {
   const dataArray = new Uint8Array(bufferLength);
   let startTime = null;
   let mover = step % stepCount;
+  let transition;
+  let rem;
 
   function draw(timestamp) {
     if (!startTime) startTime = timestamp;
@@ -357,10 +357,19 @@ function initializeAnalyzer(analyser) {
 
     let x = 0;
 
+    transition = mover > schedule.patternLength - 1 ? true : false;
+
+    // if (transition) {
+    //   const progOneToZero = stepCount % mover;
+    //   sCanvasCtx.fillStyle = `rgb(245, 0, 87, ${
+    //     progOneToZero < 0.5 ? progOneToZero : 1 - progOneToZero
+    //   })`;
+    //   sCanvasCtx.fillRect(0, 0, sCanvas.width, sCanvas.height);
+    // }
+
     for (let i = 0; i < bufferLength; i++) {
       const v = dataArray[i] / 128.0;
       const y = (v - 1.0) * 2.0 * oCanvas.height + oCanvas.height / 2;
-      // console.log(v);
 
       if (i === 0) {
         oCanvasCtx.moveTo(x, y);
@@ -375,39 +384,42 @@ function initializeAnalyzer(analyser) {
 
     sCanvasCtx.fillStyle = 'rgb(0, 0, 0, 0.2)';
     sCanvasCtx.textAlign = 'center';
-    // sCanvasCtx.fillRect(sCanvas.width / 2 - 5, 0, 5, sCanvas.height);
+    const playingColor = `#f50057`;
+    const playingSampleColor = `#3fb5a3`;
+    const scheduledColor = `#3f51b5`;
+    const playedColor = `rgb(0, 0, 0, ${0.3})`;
     for (let l = 0; l < schedule.patternLength; l += 1) {
       for (let i = 0; i < schedule.synths.length; i += 1) {
         if (schedule.synths[i].pattern[l].on) {
           if (l === (step % stepCount) - 1) {
-            sCanvasCtx.fillStyle = `#f50057`;
+            sCanvasCtx.fillStyle = playingColor;
           } else if (l > (step % stepCount) - 1) {
-            sCanvasCtx.fillStyle = `#3f51b5`;
+            sCanvasCtx.fillStyle = scheduledColor;
           } else {
-            sCanvasCtx.fillStyle = `rgb(0, 0, 0, ${0.3})`;
+            sCanvasCtx.fillStyle = playedColor;
           }
           sCanvasCtx.fillRect(
             sCanvas.width / 2 + l * 10 + 5 - mover * 10,
             i * 10,
-            5,
-            5
+            transition ? (stepCount % mover) * 5 : 5,
+            transition ? (stepCount % mover) * 5 : 5
           );
         }
       }
       for (let i = 0; i < schedule.samples.length; i += 1) {
-        if (schedule.samples[i].pattern[l].on) {
+        if (schedule.samples[i].pattern[l].on && !transition) {
           if (l === (step % stepCount) - 1) {
-            sCanvasCtx.fillStyle = `#f50057`;
+            sCanvasCtx.fillStyle = playingColor;
           } else if (l > (step % stepCount) - 1) {
-            sCanvasCtx.fillStyle = `#3fb5a3`;
+            sCanvasCtx.fillStyle = playingSampleColor;
           } else {
-            sCanvasCtx.fillStyle = `rgb(0, 0, 0, ${0.3})`;
+            sCanvasCtx.fillStyle = playedColor;
           }
           sCanvasCtx.fillRect(
             sCanvas.width / 2 + l * 10 + 5 - mover * 10,
             i * 10 + schedule.synths.length * 10,
-            5,
-            5
+            transition ? (stepCount % mover) * 5 : 5,
+            transition ? (stepCount % mover) * 5 : 5
           );
         }
       }

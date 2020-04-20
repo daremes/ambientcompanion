@@ -13,3 +13,7 @@ h5,
 h6 {
   font-family: 'Finalnew', Fallback, sans-serif !important;
 }
+
+body {
+  background-color: #fafafa;
+}
