@@ -26,7 +26,7 @@ export function getPattern(patternLength, probability) {
   const arr = [];
   for (let i = 0; i < patternLength; i += 1) {
     const newStep = {
-      on: Math.random() >= 0.75,
+      on: Math.random() >= 0.8,
       frequency: getRandomTone(),
     };
     arr.push(newStep);
@@ -73,7 +73,7 @@ export function getSynth(patternLength, synthType) {
       voices: 1,
       oscType: synthType ? synthType : 'sine',
       muted: 0,
-      volume: 0.1,
+      volume: 0.3,
       noteLength: 0.25,
       envelope: {
         attack: 0.005,
@@ -115,7 +115,7 @@ export function generateSchedule(
         instrument: {
           track: 0,
           name: soundFiles.samples[0].name,
-          volume: 0.5,
+          volume: 1,
           reverb: 0.1,
           pitchShiftLimit: 0,
           muted: 0,
@@ -130,7 +130,7 @@ export function generateSchedule(
         instrument: {
           track: 1,
           name: soundFiles.samples[1].name,
-          volume: 0.5,
+          volume: 0.3,
           reverb: 0.3,
           pitchShiftLimit: 0.3,
           muted: 0,

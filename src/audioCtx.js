@@ -45,8 +45,9 @@ let reverbNode = undefined;
 let isPlaying = false;
 let wetGain = undefined;
 let dryGain = undefined;
-let globalReverb = 0;
+let globalReverb = 0.3;
 let stepperEvent = undefined;
+let justReseted = false;
 
 const requestAnimationFrame =
   window.requestAnimationFrame ||
@@ -63,6 +64,7 @@ function reSchedule(newSchedule) {
   previousSchedule = { ...schedule };
   schedule = { ...newSchedule };
   stepCount = newSchedule.patternLength;
+  justReseted = true;
   step = 0;
   return schedule;
 }
@@ -143,10 +145,8 @@ function onPause() {
 function onResume() {
   isPlaying = true;
   audioContext.resume();
-  // audioContext = !audioContext ? new AudioContext() : audioContext;
-  // clock = !clock ? new WAAClock(audioContext) : clock;
+
   masterGainNode = audioContext.createGain();
-  // sampleGainNode = audioContext.createGain();
   wetGain = audioContext.createGain();
   dryGain = audioContext.createGain();
   reverbNode = audioContext.createConvolver();
@@ -265,7 +265,7 @@ function handlePlayStep() {
           ].instrument;
           const { attack, decay, sustain, release } = envelope;
           const dynamics = (Math.random() * 50 * volume) / 100;
-          let humanize = count * 0.01;
+          let humanize = count * 0.02;
           const now = audioContext.currentTime + humanize;
           const sustainLevel = ((volume - dynamics) * sustain) / 100;
           const timeToStartDecay = now + attack * 5;
@@ -323,10 +323,24 @@ function initializeAnalyzer(analyser) {
   const sCanvasCtx = sCanvas.getContext('2d');
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
-  console.log(sCanvas.height);
+  let startTime = null;
+  let mover = step % stepCount;
 
-  function draw() {
-    animationRequest = requestAnimationFrame(draw);
+  function draw(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const runtime = timestamp - startTime;
+    if (!justReseted) {
+      mover = runtime / (beatLengthInSeconds * 1000);
+    } else {
+      justReseted = false;
+      // mover = step % stepCount;
+      startTime = timestamp;
+    }
+
+    if (mover > schedule.patternLength) {
+      mover = step % stepCount;
+      startTime = timestamp;
+    }
 
     analyser.getByteTimeDomainData(dataArray);
 
@@ -361,7 +375,7 @@ function initializeAnalyzer(analyser) {
 
     sCanvasCtx.fillStyle = 'rgb(0, 0, 0, 0.2)';
     sCanvasCtx.textAlign = 'center';
-    sCanvasCtx.fillRect(sCanvas.width / 2 - 5, 0, 5, sCanvas.height);
+    // sCanvasCtx.fillRect(sCanvas.width / 2 - 5, 0, 5, sCanvas.height);
     for (let l = 0; l < schedule.patternLength; l += 1) {
       for (let i = 0; i < schedule.synths.length; i += 1) {
         if (schedule.synths[i].pattern[l].on) {
@@ -373,7 +387,7 @@ function initializeAnalyzer(analyser) {
             sCanvasCtx.fillStyle = `rgb(0, 0, 0, ${0.3})`;
           }
           sCanvasCtx.fillRect(
-            sCanvas.width / 2 + l * 10 + 5 - (step % stepCount) * 10,
+            sCanvas.width / 2 + l * 10 + 5 - mover * 10,
             i * 10,
             5,
             5
@@ -390,7 +404,7 @@ function initializeAnalyzer(analyser) {
             sCanvasCtx.fillStyle = `rgb(0, 0, 0, ${0.3})`;
           }
           sCanvasCtx.fillRect(
-            sCanvas.width / 2 + l * 10 + 5 - (step % stepCount) * 10,
+            sCanvas.width / 2 + l * 10 + 5 - mover * 10,
             i * 10 + schedule.synths.length * 10,
             5,
             5
@@ -398,6 +412,7 @@ function initializeAnalyzer(analyser) {
         }
       }
     }
+    animationRequest = requestAnimationFrame(draw);
   }
   draw();
 }

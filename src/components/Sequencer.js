@@ -85,7 +85,7 @@ export default function Sequencer({ initGain }) {
       // setMasterGainNode(getMasterGainNode());
       setIsPlaying(true);
     } else {
-      // memoizedHandleReschedule();
+      memoizedHandleReschedule();
       handleSequencerSwitch();
       setIsPlaying(false);
       // setMetro(0);
@@ -161,7 +161,7 @@ export default function Sequencer({ initGain }) {
               color='primary'
               onClick={() => setInfinite(prev => !prev)}
             >
-              {infinite ? 'InfiniteMode On' : 'LoopMode On'}
+              {infinite ? 'INFINITE GENERATOR ON' : 'LOOP PATTERN ON'}
             </Button>
           </div>
         </>
