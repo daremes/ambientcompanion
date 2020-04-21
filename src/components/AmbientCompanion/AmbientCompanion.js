@@ -164,7 +164,7 @@ export default function AmbientCompanion() {
           <BottomControls>
             <Button
               variant='text'
-              color='primary'
+              color='default'
               onClick={() => setInfinite(prev => !prev)}
             >
               {infinite ? 'INFINITE GENERATOR ON' : 'LOOP PATTERN ON'}

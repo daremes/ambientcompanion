@@ -324,6 +324,11 @@ function initializeAnalyzer(analyser) {
   let mover = step % stepCount;
   let transition;
 
+  const playingColor = `#f50057`;
+  const playingSampleColor = `#3fb5a3`;
+  const scheduledColor = `#3f51b5`;
+  const playedColor = `rgb(0, 0, 0, ${0.3})`;
+
   function draw(timestamp) {
     if (!startTime) startTime = timestamp;
     const runtime = timestamp - startTime;
@@ -345,7 +350,7 @@ function initializeAnalyzer(analyser) {
     oCanvasCtx.clearRect(0, 0, oCanvas.width, oCanvas.height);
     sCanvasCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
 
-    oCanvasCtx.strokeStyle = 'rgb(0, 0, 0, 0.3)';
+    oCanvasCtx.strokeStyle = playedColor;
 
     oCanvasCtx.lineWidth = 2;
 
@@ -382,10 +387,6 @@ function initializeAnalyzer(analyser) {
 
     sCanvasCtx.fillStyle = 'rgb(0, 0, 0, 0.2)';
     sCanvasCtx.textAlign = 'center';
-    const playingColor = `#f50057`;
-    const playingSampleColor = `#3fb5a3`;
-    const scheduledColor = `#3f51b5`;
-    const playedColor = `rgb(0, 0, 0, ${0.3})`;
     for (let l = 0; l < schedule.patternLength; l += 1) {
       for (let i = 0; i < schedule.synths.length; i += 1) {
         if (schedule.synths[i].pattern[l].on) {
