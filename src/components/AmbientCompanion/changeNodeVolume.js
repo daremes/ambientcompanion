@@ -1,5 +1,5 @@
 export default function(node, audioContext, value) {
   if (node && audioContext) {
-    node.gain.setValueAtTime(value, audioContext.currentTime);
+    node.gain.setTargetAtTime(value, audioContext.currentTime, 0.005);
   }
 }

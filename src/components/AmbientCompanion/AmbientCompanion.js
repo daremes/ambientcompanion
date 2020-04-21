@@ -2,35 +2,49 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 import SettingsIcon from '@material-ui/icons/SettingsInputComponent';
-import VolumeSlider from './VolumeSlider';
+import SettingsMenu from './SettingsMenu';
+import Intro from './Intro';
 import {
   reSchedule,
-  getSchedule,
   handleSequencerSwitch,
   getMasterGainNode,
   getStepCount,
-  getStep,
-  getSampleRate,
+  getAudioContext,
+  onPause,
   loadAudioData,
 } from './audioCtx';
+import changeNodeVolume from './changeNodeVolume';
 import { generateSchedule, getRandomInt } from './defaultSchedule';
 import ImgLoader from '../../images/loader.svg';
 // import useAnimationFrame from '../useAnimationFrame';
 import ICOplay from '../../images/play.svg';
 import ICOpause from '../../images/pause.svg';
 
-export default function AmbientCompanion({ initGain }) {
+export default function AmbientCompanion() {
   const [metro, setMetro] = useState(-1);
-  // const [schedule, setSchedule] = useState(getSchedule());
   // const [masterGainNode, setMasterGainNode] = useState(getMasterGainNode());
+  const [masterGain, setMasterGain] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [intro, setIntro] = useState(true);
   const [stepCount, setStepCount] = useState(getStepCount());
   const [infinite, setInfinite] = useState(true);
+  const [settingsOpened, setSettingsOpened] = useState(false);
   // const [sr, setSr] = useState(getSampleRate());
   const [loaded, setLoaded] = useState(false);
   // const [err, setErr] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Loading audio stuff');
   // const [oscCount, setOscCount] = useState(0);
+  const memoizedHandleReschedule = useCallback(() => {
+    let newPatternLength = getRandomInt(4, 64);
+    if (newPatternLength % 2 !== 0) {
+      newPatternLength += 1;
+    }
+    const newSchedule = generateSchedule(newPatternLength);
+    reSchedule(newSchedule);
+    // setSchedule(newSchedule);
+    setStepCount(newPatternLength);
+    setMetro(-1);
+  }, []);
 
   useEffect(() => {
     loadAudioData().then(loadingErrors => {
@@ -47,9 +61,8 @@ export default function AmbientCompanion({ initGain }) {
       }
     });
     console.log('Audio data not yet loaded...');
-
-    function tick() {
-      // console.log('tick', metro);
+    memoizedHandleReschedule();
+    function tick(metro) {
       setMetro(metro => metro + 1);
     }
     function onTrigger(e) {
@@ -59,20 +72,14 @@ export default function AmbientCompanion({ initGain }) {
     window.addEventListener('trigger', onTrigger);
     return () => {
       window.removeEventListener('trigger', onTrigger);
+      // const ctx = getAudioContext();
+      onPause();
     };
-  }, []);
+  }, [memoizedHandleReschedule]);
 
-  const memoizedHandleReschedule = useCallback(() => {
-    let newPatternLength = getRandomInt(4, 64);
-    if (newPatternLength % 2 !== 0) {
-      newPatternLength += 1;
-    }
-    const newSchedule = generateSchedule(newPatternLength);
-    reSchedule(newSchedule);
-    // setSchedule(newSchedule);
-    setStepCount(newPatternLength);
-    setMetro(-1);
-  }, []);
+  useEffect(() => {
+    changeNodeVolume(getMasterGainNode(), getAudioContext(), masterGain);
+  }, [masterGain]);
 
   useEffect(() => {
     if (metro % stepCount === stepCount - 1 && infinite) {
@@ -83,6 +90,9 @@ export default function AmbientCompanion({ initGain }) {
   function switchPlay() {
     if (isPlaying === false) {
       handleSequencerSwitch();
+      if (intro) {
+        setIntro(false);
+      }
       // setMasterGainNode(getMasterGainNode());
       setIsPlaying(true);
     } else {
@@ -93,78 +103,61 @@ export default function AmbientCompanion({ initGain }) {
     }
   }
 
+  function handleOpenSettings() {
+    setSettingsOpened(settingsOpened => !settingsOpened);
+  }
+
   return (
-    <div
-      style={{
-        display: 'block',
-        width: '100%',
-        maxWidth: '480px',
-        boxShadow: '0px 0px 5px 2px rgba(214,214,214,1)',
-        padding: '24px',
-      }}
-    >
-      <h1
-        style={{
-          fontSize: '28px',
-          marginBlockEnd: '0',
-          marginBlockStart: '0px',
-        }}
-      >
-        AmbientCompanion
-      </h1>
-      <h2
-        style={{
-          fontSize: '20px',
-          marginBlockEnd: '24px',
-          marginBlockStart: '0px',
-          fontWeight: 'normal',
-          fontColor: '#666',
-        }}
-      >
-        by feline astronauts
-      </h2>
-      {/* <div style={{ fontSize: '10px' }}>
-        <p>Debug | number of active oscillators: {oscCount}</p>
-      </div> */}
+    <Wrapper>
+      <Header>AmbientCompanion</Header>
+      <SubHeader>by feline astronauts</SubHeader>
       {loaded ? (
         <>
-          <div style={{ marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Button
-                variant={!isPlaying ? 'contained' : 'text'}
-                color='primary'
-                onClick={() => switchPlay()}
-              >
-                {isPlaying ? (
-                  <PlayIcon src={ICOpause} alt='' />
-                ) : (
-                  <PlayIcon src={ICOplay} alt='' />
-                )}
-              </Button>
-              <Button
-                variant='text'
-                color='default'
-                onClick={() => memoizedHandleReschedule()}
-              >
-                <SettingsIcon />
-              </Button>
-              <Button
-                variant='text'
-                color='secondary'
-                disabled={!isPlaying}
-                onClick={() => memoizedHandleReschedule()}
-              >
-                REGENERATE
-              </Button>
-            </div>
-          </div>
-          <CanvasWrapper>
-            <CanvasStepper id='stepper' />
-          </CanvasWrapper>
-          <CanvasWrapper>
-            <Canvas id='oscilloscope' />
-          </CanvasWrapper>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <Controls>
+            <Button
+              variant={!isPlaying ? 'contained' : 'text'}
+              color='primary'
+              onClick={() => switchPlay()}
+            >
+              {isPlaying ? (
+                <PlayIcon src={ICOpause} alt='' />
+              ) : (
+                <PlayIcon src={ICOplay} alt='' />
+              )}
+            </Button>
+            <Button
+              variant='text'
+              color='default'
+              onClick={() => handleOpenSettings()}
+            >
+              <SettingsIcon />
+            </Button>
+            <Button
+              variant='text'
+              color='secondary'
+              disabled={!isPlaying}
+              onClick={() => memoizedHandleReschedule()}
+            >
+              REGENERATE
+            </Button>
+          </Controls>
+          {settingsOpened ? (
+            <SettingsMenu
+              onClose={handleOpenSettings}
+              masterGain={masterGain}
+              setMasterGain={setMasterGain}
+            />
+          ) : null}
+          <VisualContent>
+            <CanvasWrapper>
+              <CanvasStepper id='stepper' />
+            </CanvasWrapper>
+            <CanvasWrapper>
+              <Canvas id='oscilloscope' />
+            </CanvasWrapper>
+            {intro ? <Intro /> : null}
+          </VisualContent>
+          <BottomControls>
             <Button
               variant='text'
               color='primary'
@@ -172,7 +165,7 @@ export default function AmbientCompanion({ initGain }) {
             >
               {infinite ? 'INFINITE GENERATOR ON' : 'LOOP PATTERN ON'}
             </Button>
-          </div>
+          </BottomControls>
         </>
       ) : (
         <LoaderContainer>
@@ -180,9 +173,42 @@ export default function AmbientCompanion({ initGain }) {
           {loadingMessage}
         </LoaderContainer>
       )}
-    </div>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0px 0px 5px 2px rgba(214, 214, 214, 1);
+  padding: 24px;
+`;
+
+const Header = styled.h1`
+  font-size: 28px;
+  margin-block-end: 0;
+  margin-block-start: 0;
+`;
+
+const SubHeader = styled.h2`
+  font-size: 20px;
+  margin-block-end: 24px;
+  margin-block-start: 0px;
+  font-weight: normal;
+  color: #666;
+`;
+
+const Controls = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+`;
+
+const BottomControls = styled.div`
+  display: flex;
+  justify-content: center;
+`;
 
 const LoaderContainer = styled.div`
   display: flex;
@@ -194,17 +220,23 @@ const LoaderContainer = styled.div`
   }
 `;
 
+const VisualContent = styled.div`
+  position: relative;
+  display: block;
+  width: 100%;
+`;
+
 const Canvas = styled.canvas`
   width: 90%;
   height: 80px;
-  box-shadow: 0px 0px 5px 0px rgba(214, 214, 214, 1);
+  /* box-shadow: 0px 0px 5px 0px rgba(214, 214, 214, 1); */
   border-radius: 5px;
 `;
 
 const CanvasStepper = styled.canvas`
   width: 90%;
   height: 95px;
-  box-shadow: 0px 0px 5px 0px rgba(214, 214, 214, 1);
+  /* box-shadow: 0px 0px 5px 0px rgba(214, 214, 214, 1); */
   border-radius: 5px;
 `;
 

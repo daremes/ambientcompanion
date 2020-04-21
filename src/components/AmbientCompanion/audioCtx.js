@@ -1,7 +1,6 @@
 import * as WAAClock from './WAAClock';
 import changeNodeVolume from './changeNodeVolume';
 import defaultSchedule, {
-  generateSchedule,
   getRandomArbitrary,
   getRandomInt,
 } from './defaultSchedule';
@@ -324,7 +323,6 @@ function initializeAnalyzer(analyser) {
   let startTime = null;
   let mover = step % stepCount;
   let transition;
-  let rem;
 
   function draw(timestamp) {
     if (!startTime) startTime = timestamp;
@@ -441,15 +439,12 @@ function getAudioContext() {
   return audioContext;
 }
 
-function getStepCount() {
-  return stepCount;
-}
-
 function getIsPlaying() {
   return isPlaying;
 }
 
 const getStep = () => step;
+const getStepCount = () => stepCount;
 
 function getSampleRate() {
   return audioContext.sampleRate;
@@ -469,6 +464,7 @@ export {
   getClock,
   getStepCount,
   getStep,
+  onPause,
   unsupported,
   loadAudioData,
 };

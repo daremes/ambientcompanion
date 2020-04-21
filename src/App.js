@@ -28,7 +28,7 @@ function App() {
             <Home />
           </Route>
           <Route path='/ambientcompanion'>
-            <AmbientCompanion initGain={0.2} />
+            <AmbientCompanion />
           </Route>
         </DefaultLayout>
       </ThemeProvider>
