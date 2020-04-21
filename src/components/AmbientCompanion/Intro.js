@@ -1,14 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
+import Logo from '../../images/logo.jpg';
 
 export default function Intro() {
   return (
     <>
       <Wrapper>
-        <img
-          src='https://www.vettedpetcare.com/vetted-blog/wp-content/uploads/2017/09/How-To-Travel-With-a-Super-Anxious-Cat-square.jpeg'
-          alt=''
-        />
+        <img src={Logo} alt='' />
       </Wrapper>
     </>
   );

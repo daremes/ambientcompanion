@@ -19,6 +19,7 @@ import ImgLoader from '../../images/loader.svg';
 // import useAnimationFrame from '../useAnimationFrame';
 import ICOplay from '../../images/play.svg';
 import ICOpause from '../../images/pause.svg';
+import TitleImg from '../../images/ambcomptitle.png';
 
 export default function AmbientCompanion() {
   const [metro, setMetro] = useState(-1);
@@ -109,8 +110,11 @@ export default function AmbientCompanion() {
 
   return (
     <Wrapper>
-      <Header>AmbientCompanion</Header>
-      <SubHeader>by feline astronauts</SubHeader>
+      {/* <Header>AmbientCompanion</Header>
+      <SubHeader>by feline astronauts</SubHeader> */}
+      <TitleImage>
+        <img src={TitleImg} alt='' />
+      </TitleImage>
       {loaded ? (
         <>
           <Controls>
@@ -183,6 +187,16 @@ const Wrapper = styled.div`
   max-width: 480px;
   box-shadow: 0px 0px 5px 2px rgba(214, 214, 214, 1);
   padding: 24px;
+`;
+
+const TitleImage = styled.div`
+  width: 100%;
+  margin-bottom: 24px;
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+  }
 `;
 
 const Header = styled.h1`

@@ -1,18 +1,16 @@
-@font-face {
+/* @font-face {
   font-family: 'Finalnew';
-  src:
-    /* url(/Finalnew.ttf) format("truetype"); */ url(/FuckinGwenhwyfar.ttf)
-    format('truetype');
-}
+  src: url(/FuckinGwenhwyfar.ttf) format('truetype');
+} */
 
-h1,
+/* h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
   font-family: 'Finalnew', Fallback, sans-serif !important;
-}
+} */
 
 body {
   background-color: #fafafa;
