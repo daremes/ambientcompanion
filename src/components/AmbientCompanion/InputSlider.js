@@ -1,19 +1,14 @@
 import React, { useState } from 'react';
 import Slider from '@material-ui/core/Slider';
-import VolumeDown from '@material-ui/icons/VolumeDown';
-import VolumeUp from '@material-ui/icons/VolumeUp';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-
 //
-export default function ContinuousSlider({ masterGain, method }) {
-  const [value, setValue] = useState(masterGain * 100);
+export default function InputSlider({ method, opts, target, min, max, step }) {
+  const [value, setValue] = useState(opts[target]);
 
   const handleChange = (event, newValue) => {
-    const volume = (Math.exp(newValue / 100) - 1) / (Math.E - 1);
-    if (method) {
-      method(volume);
-    }
     setValue(newValue);
+    if (method) {
+      method(newValue, target);
+    }
   };
 
   return (
@@ -29,6 +24,9 @@ export default function ContinuousSlider({ masterGain, method }) {
         value={value}
         onChange={handleChange}
         aria-labelledby='continuous-slider'
+        min={min}
+        max={max}
+        step={step ? step : 1}
       />
     </div>
   );

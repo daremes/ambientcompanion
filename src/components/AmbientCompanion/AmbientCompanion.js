@@ -12,6 +12,8 @@ import {
   getAudioContext,
   onPause,
   loadAudioData,
+  getOptions,
+  setOptions,
 } from './audioCtx';
 import changeNodeVolume from './changeNodeVolume';
 import { generateSchedule, getRandomInt } from './defaultSchedule';
@@ -30,6 +32,7 @@ export default function AmbientCompanion() {
   const [stepCount, setStepCount] = useState(getStepCount());
   const [infinite, setInfinite] = useState(true);
   const [settingsOpened, setSettingsOpened] = useState(false);
+  const [opts, setOpts] = useState(getOptions());
   // const [sr, setSr] = useState(getSampleRate());
   const [loaded, setLoaded] = useState(false);
   // const [err, setErr] = useState(false);
@@ -108,6 +111,11 @@ export default function AmbientCompanion() {
     setSettingsOpened(settingsOpened => !settingsOpened);
   }
 
+  function handleChangeOptions(value, what) {
+    setOpts({ ...opts, [what]: value });
+    setOptions({ ...opts, [what]: value });
+  }
+
   return (
     <Wrapper>
       {/* <Header>AmbientCompanion</Header>
@@ -150,6 +158,8 @@ export default function AmbientCompanion() {
               onClose={handleOpenSettings}
               masterGain={masterGain}
               setMasterGain={setMasterGain}
+              handleChangeOptions={handleChangeOptions}
+              opts={opts}
             />
           ) : null}
           <VisualContent>
@@ -190,7 +200,7 @@ const Wrapper = styled.div`
 `;
 
 const TitleImage = styled.div`
-  width: 100%;
+  width: 280px;
   margin-bottom: 24px;
   img {
     max-width: 100%;
@@ -199,19 +209,19 @@ const TitleImage = styled.div`
   }
 `;
 
-const Header = styled.h1`
-  font-size: 28px;
-  margin-block-end: 0;
-  margin-block-start: 0;
-`;
+// const Header = styled.h1`
+//   font-size: 28px;
+//   margin-block-end: 0;
+//   margin-block-start: 0;
+// `;
 
-const SubHeader = styled.h2`
-  font-size: 20px;
-  margin-block-end: 24px;
-  margin-block-start: 0px;
-  font-weight: normal;
-  color: #666;
-`;
+// const SubHeader = styled.h2`
+//   font-size: 20px;
+//   margin-block-end: 24px;
+//   margin-block-start: 0px;
+//   font-weight: normal;
+//   color: #666;
+// `;
 
 const Controls = styled.div`
   display: flex;

@@ -44,8 +44,12 @@ let isPlaying = false;
 let wetGain = undefined;
 let dryGain = undefined;
 let globalReverb = 0.3;
-let stepperEvent = undefined;
 let justReseted = false;
+let modulatorBase = 1;
+let modulatorOsc = undefined;
+let modulatorGainNode = undefined;
+let modulatorDepth = 100;
+let fm = false;
 
 const requestAnimationFrame =
   window.requestAnimationFrame ||
@@ -201,10 +205,25 @@ function handleSequencerSwitch() {
   }
 }
 
+function setOptions({ fmBase, fmDepth, fmOn }) {
+  modulatorBase = fmBase;
+  modulatorDepth = fmDepth;
+  fm = fmOn;
+}
+
+function getOptions() {
+  return {
+    fmBase: modulatorBase,
+    fmDepth: modulatorDepth,
+    fmOn: fm,
+  };
+}
+
 function handlePlayStep() {
   if (audioContext.state === 'running' && isPlaying) {
     triggerEvent();
     const s = step % stepCount;
+
     // console.log(`${s}/${stepCount}`);
     for (let count = 0; count < schedule.samples.length; count += 1) {
       if (schedule.samples[count].pattern.length > s) {
@@ -250,6 +269,17 @@ function handlePlayStep() {
           osc.frequency.value = frequency;
           const pan = frequency > 200 ? getRandomArbitrary(-1, 1) : 0;
 
+          // FM Synthesis
+          if (fm) {
+            modulatorOsc = audioContext.createOscillator();
+            modulatorGainNode = audioContext.createGain();
+            modulatorOsc.frequency.value = frequency * modulatorBase;
+            modulatorGainNode.gain.value = modulatorDepth;
+            modulatorOsc.connect(modulatorGainNode);
+            modulatorGainNode.connect(osc.frequency);
+          }
+          // < FM Synthesis
+
           if (!unsupported) {
             panNode.pan.setValueAtTime(pan, audioContext.currentTime);
           } else {
@@ -279,29 +309,25 @@ function handlePlayStep() {
 
           gainNode.gain.setTargetAtTime(0, timeToStartRelease, release);
 
-          osc.start(now);
-
           const stopTime =
             noteLength * beatLengthInSeconds +
             attack * 5 +
             decay * 5 +
             release * 5;
 
+          if (fm) {
+            modulatorOsc.start(now);
+          }
+          osc.start(now);
+
           // numberOfOsc += 1;
-          // console.log(
-          //   `now: ${now}, volume: ${volume}, dynamicVolume: ${volume -
-          //     dynamics}, sustainLevel: ${sustainLevel},
-          //     attack: ${attack}, timeToStartDecay: ${timeToStartDecay},
-          //     timeToStartRelease: ${timeToStartRelease},
-          //     noteLength: ${noteLength}, noteLengthInSeconds: ${noteLengthInSeconds},
-          //     beatLengthInSeconds: ${beatLengthInSeconds},
-          //     stopTime: ${now + stopTime}
-          // `
-          // );
+          if (fm) {
+            // console.log(modulatorOsc.frequency.value, osc.frequency.value);
+
+            modulatorOsc.stop(now + stopTime);
+          }
           osc.stop(now + stopTime);
           // setTimeout(() => subtract(), 1500);
-
-          // osc.onended = () => osc.disconnect();
         }
       }
     }
@@ -406,7 +432,7 @@ function initializeAnalyzer(analyser) {
         }
       }
       for (let i = 0; i < schedule.samples.length; i += 1) {
-        if (schedule.samples[i].pattern[l].on && !transition) {
+        if (schedule.samples[i].pattern[l].on) {
           if (l === (step % stepCount) - 1) {
             sCanvasCtx.fillStyle = playingColor;
           } else if (l > (step % stepCount) - 1) {
@@ -468,4 +494,7 @@ export {
   onPause,
   unsupported,
   loadAudioData,
+  fm,
+  setOptions,
+  getOptions,
 };
