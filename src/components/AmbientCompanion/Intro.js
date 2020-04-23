@@ -1,12 +1,12 @@
 import React from 'react';
-import styled from 'styled-components';
-import Logo from '../../images/logo.jpg';
+import styled, { keyframes } from 'styled-components';
+import Logo from '../../images/cat-knob.svg';
 
-export default function Intro() {
+export default function Intro({ start }) {
   return (
     <>
       <Wrapper>
-        <img src={Logo} alt='' />
+        <img src={Logo} alt='' onClick={start} />
       </Wrapper>
     </>
   );
@@ -25,5 +25,6 @@ const Wrapper = styled.div`
     max-width: 100%;
     max-height: 100%;
     height: auto;
+    cursor: pointer;
   }
 `;

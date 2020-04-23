@@ -169,7 +169,7 @@ export default function AmbientCompanion() {
             <CanvasWrapper>
               <Canvas id='oscilloscope' />
             </CanvasWrapper>
-            {intro ? <Intro /> : null}
+            {intro ? <Intro start={switchPlay} /> : null}
           </VisualContent>
           <BottomControls>
             <Button
