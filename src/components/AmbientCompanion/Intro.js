@@ -1,16 +1,30 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
-import Logo from '../../images/cat-knob.svg';
+import { ReactComponent as Logo } from '../../images/cat-knob.svg';
 
 export default function Intro({ start }) {
   return (
     <>
       <Wrapper>
-        <img src={Logo} alt='' onClick={start} />
+        <AnimatedLogo onClick={start} />
       </Wrapper>
     </>
   );
 }
+
+const rotate = keyframes`
+  0% { transform: rotateZ(0deg); }
+  70% { transform: rotateZ(200deg); }
+  100% { transform: rotateZ(0deg); }
+`;
+
+const AnimatedLogo = styled(Logo)`
+  cursor: pointer;
+  #KnobTop {
+    animation: ${rotate} 5 4s ease-in-out;
+    transform-origin: 407px 137px;
+  }
+`;
 
 const Wrapper = styled.div`
   position: absolute;
@@ -25,6 +39,5 @@ const Wrapper = styled.div`
     max-width: 100%;
     max-height: 100%;
     height: auto;
-    cursor: pointer;
   }
 `;
