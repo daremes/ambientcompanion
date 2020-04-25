@@ -52,7 +52,7 @@ const defaultOptions = {
   fmDepth: 100,
   fmOn: false,
   filterOn: false,
-  reverb: 0.25,
+  reverb: 0.3,
   samplesOn: true,
 };
 let options = { ...defaultOptions };

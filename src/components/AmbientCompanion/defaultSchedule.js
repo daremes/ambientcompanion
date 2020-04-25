@@ -76,7 +76,7 @@ export function getSynth(patternLength, synthType) {
       voices: 1,
       oscType: synthType ? synthType : 'sine',
       muted: 0,
-      volume: 0.15,
+      volume: 0.2,
       noteLength: 0.25,
       envelope: {
         attack: 0.005,
