@@ -16,7 +16,7 @@ const scale = ['d', 'e', 'f', 'g', 'a', 'a#', 'c'];
 function getRandomTone(octaveMin, octaveMax) {
   const octave = getRandomInt(
     octaveMin ? octaveMin : 1,
-    octaveMax ? octaveMax : 7
+    octaveMax ? octaveMax : 6
   );
   const chooseNote = `${scale[getRandomInt(0, 7)]}${octave}`;
   return note(chooseNote).freq;
@@ -76,7 +76,7 @@ export function getSynth(patternLength, synthType) {
       voices: 1,
       oscType: synthType ? synthType : 'sine',
       muted: 0,
-      volume: 0.3,
+      volume: 0.15,
       noteLength: 0.25,
       envelope: {
         attack: 0.005,
