@@ -14,6 +14,7 @@ import {
   loadAudioData,
   getOptions,
   setOptions,
+  resetOptions,
 } from './audioCtx';
 import changeNodeVolume from './changeNodeVolume';
 import { generateSchedule, getRandomInt } from './defaultSchedule';
@@ -116,6 +117,10 @@ export default function AmbientCompanion() {
     setOptions({ ...opts, [what]: value });
   }
 
+  function handleResetOptions() {
+    setOpts(resetOptions());
+  }
+
   return (
     <Wrapper>
       {/* <Header>AmbientCompanion</Header>
@@ -159,6 +164,7 @@ export default function AmbientCompanion() {
               masterGain={masterGain}
               setMasterGain={setMasterGain}
               handleChangeOptions={handleChangeOptions}
+              handleResetOptions={handleResetOptions}
               opts={opts}
             />
           ) : null}

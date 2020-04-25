@@ -61,7 +61,10 @@ export function getSamplesPattern(patternLength, m) {
 export function getSynths(patternLength, synthsCount) {
   const arr = [];
   for (let i = 0; i < synthsCount; i += 1) {
-    const synthType = Math.random() >= 0.9 ? 'triangle' : 'sine';
+    const rnd = Math.random();
+    let synthType = 'sine';
+    if (rnd > 0.91 && rnd <= 0.99) synthType = 'triangle';
+    if (rnd > 0.99) synthType = 'square';
     arr.push(getSynth(patternLength, synthType));
   }
   return arr;
@@ -114,7 +117,10 @@ export function generateSchedule(
       {
         instrument: {
           track: 0,
-          name: soundFiles.samples[0].name,
+          fileName: '808-BD-mod.m4a',
+          name: '808 Kick',
+          description: '',
+          type: 'BD',
           volume: 1,
           reverb: 0.1,
           pitchShiftLimit: 0,
@@ -129,7 +135,10 @@ export function generateSchedule(
       {
         instrument: {
           track: 1,
-          name: soundFiles.samples[1].name,
+          fileName: 'RIM.m4a',
+          name: 'RIM',
+          description: '',
+          type: 'SD',
           volume: 0.3,
           reverb: 0.3,
           pitchShiftLimit: 0.3,
@@ -143,7 +152,10 @@ export function generateSchedule(
       {
         instrument: {
           track: 2,
-          name: soundFiles.samples[2].name,
+          fileName: 'vinyl.m4a',
+          name: 'Vinyl noise',
+          description: '',
+          type: 'FX',
           volume: 0.5,
           reverb: 0.3,
           pitchShiftLimit: 0,
@@ -157,7 +169,10 @@ export function generateSchedule(
       {
         instrument: {
           track: 3,
-          name: soundFiles.samples[3].name,
+          fileName: 'soundscape1.m4a',
+          name: 'Soundscape 1 Dm',
+          description: '',
+          type: 'Soundscape',
           volume: 0.5,
           reverb: 0.3,
           pitchShiftLimit: 0,
@@ -171,7 +186,10 @@ export function generateSchedule(
       {
         instrument: {
           track: 4,
-          name: soundFiles.samples[4].name,
+          fileName: 'soundscape2.m4a',
+          name: 'Soundscape 2 Dm',
+          description: '',
+          type: 'Soundscape',
           volume: 0.5,
           reverb: 0.3,
           pitchShiftLimit: 0,

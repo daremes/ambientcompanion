@@ -1,5 +1,4 @@
 import * as WAAClock from './WAAClock';
-import changeNodeVolume from './changeNodeVolume';
 import defaultSchedule, {
   getRandomArbitrary,
   getRandomInt,
@@ -16,12 +15,13 @@ let sampleGainNodes = new Array(defaultSchedule.samples.length);
 let sampleDryNodes = new Array(defaultSchedule.samples.length);
 let sampleWetNodes = new Array(defaultSchedule.samples.length);
 
-const { irs, samples } = soundFiles;
+const { irs } = soundFiles;
+const { samples } = defaultSchedule;
 irs.forEach((ir, index) => {
   irSources[index] = require(`../../sounds/${ir.fileName}`);
 });
 samples.forEach((sample, index) => {
-  sampleSources[index] = require(`../../sounds/${sample.fileName}`);
+  sampleSources[index] = require(`../../sounds/${sample.instrument.fileName}`);
 });
 
 const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -43,13 +43,19 @@ let reverbNode = undefined;
 let isPlaying = false;
 let wetGain = undefined;
 let dryGain = undefined;
-let globalReverb = 0.3;
 let justReseted = false;
-let modulatorBase = 1;
 let modulatorOsc = undefined;
 let modulatorGainNode = undefined;
-let modulatorDepth = 100;
-let fm = false;
+let filterNode = undefined;
+const defaultOptions = {
+  fmBase: 1,
+  fmDepth: 100,
+  fmOn: false,
+  filterOn: false,
+  reverb: 0.3,
+  samplesOn: true,
+};
+let options = { ...defaultOptions };
 
 const requestAnimationFrame =
   window.requestAnimationFrame ||
@@ -173,9 +179,8 @@ function onResume() {
     sampleDryNodes[i].gain.value = 1 - reverb;
     sampleWetNodes[i].gain.value = reverb;
   }
-
-  dryGain.gain.value = 1 - globalReverb;
-  wetGain.gain.value = globalReverb;
+  dryGain.gain.value = 1 - options.reverb;
+  wetGain.gain.value = options.reverb;
 
   const compressor = audioContext.createDynamicsCompressor();
   compressor.threshold.setValueAtTime(-10, audioContext.currentTime);
@@ -190,7 +195,7 @@ function onResume() {
   clock.start();
   clock
     .callbackAtTime(() => {
-      handlePlayStep();
+      onPlayStep();
     }, 0)
     .repeat(beatLengthInSeconds);
   initializeAnalyzer(analyser);
@@ -205,43 +210,45 @@ function handleSequencerSwitch() {
   }
 }
 
-function setOptions({ fmBase, fmDepth, fmOn }) {
-  modulatorBase = fmBase;
-  modulatorDepth = fmDepth;
-  fm = fmOn;
+function setOptions(opts) {
+  options = { ...opts };
 }
 
 function getOptions() {
-  return {
-    fmBase: modulatorBase,
-    fmDepth: modulatorDepth,
-    fmOn: fm,
-  };
+  return options;
 }
 
-function handlePlayStep() {
+function resetOptions() {
+  options = { ...defaultOptions };
+  return options;
+}
+
+function onPlayStep() {
   if (audioContext.state === 'running' && isPlaying) {
     triggerEvent();
     const s = step % stepCount;
-
+    dryGain.gain.value = 1 - options.reverb;
+    wetGain.gain.value = options.reverb;
     // console.log(`${s}/${stepCount}`);
-    for (let count = 0; count < schedule.samples.length; count += 1) {
-      if (schedule.samples[count].pattern.length > s) {
-        const { on } = schedule.samples[count].pattern[s];
-        const { pitchShiftLimit } = schedule.samples[count].instrument;
-        if (on) {
-          let playbackRate = 1;
-          audioTrackSources[count] = audioContext.createBufferSource();
-          audioTrackSources[count].buffer = decodedSamples[count];
-          audioTrackSources[count].connect(sampleGainNodes[count]);
-          if (pitchShiftLimit) {
-            playbackRate =
-              Math.random() * (1 - pitchShiftLimit) + (1 - pitchShiftLimit);
-          }
-          audioTrackSources[count].playbackRate.value = playbackRate;
+    if (options.samplesOn) {
+      for (let count = 0; count < schedule.samples.length; count += 1) {
+        if (schedule.samples[count].pattern.length > s) {
+          const { on } = schedule.samples[count].pattern[s];
+          const { pitchShiftLimit } = schedule.samples[count].instrument;
+          if (on) {
+            let playbackRate = 1;
+            audioTrackSources[count] = audioContext.createBufferSource();
+            audioTrackSources[count].buffer = decodedSamples[count];
+            audioTrackSources[count].connect(sampleGainNodes[count]);
+            if (pitchShiftLimit) {
+              playbackRate =
+                Math.random() * (1 - pitchShiftLimit) + (1 - pitchShiftLimit);
+            }
+            audioTrackSources[count].playbackRate.value = playbackRate;
 
-          audioTrackSources[count].start();
-          // max, to stop
+            audioTrackSources[count].start();
+            // max, to stop
+          }
         }
       }
     }
@@ -252,6 +259,14 @@ function handlePlayStep() {
           const osc = audioContext.createOscillator();
           const gainNode = audioContext.createGain();
 
+          if (options.filterOn) {
+            filterNode = audioContext.createBiquadFilter();
+            filterNode.type = 'peaking';
+            filterNode.frequency.value = 500;
+            filterNode.gain.value = -30;
+            filterNode.Q.value = 1.5;
+          }
+
           const panNode = !unsupported
             ? audioContext.createStereoPanner()
             : audioContext.createPanner();
@@ -259,10 +274,20 @@ function handlePlayStep() {
           const { frequency } = schedule.synths[count].pattern[s];
 
           osc.connect(gainNode);
-          gainNode.connect(panNode);
-          panNode.connect(dryGain);
-          panNode.connect(wetGain);
 
+          if (options.filterOn) {
+            gainNode.connect(filterNode);
+            filterNode.connect(panNode);
+            panNode.connect(dryGain);
+            panNode.connect(wetGain);
+          } else {
+            gainNode.connect(panNode);
+            panNode.connect(dryGain);
+            panNode.connect(wetGain);
+          }
+
+          dryGain.gain.value = 1 - options.reverb;
+          wetGain.gain.value = options.reverb;
           // schedule.synths[count].instrument.reverbRatio;
 
           osc.type = schedule.synths[count].instrument.oscType;
@@ -270,11 +295,11 @@ function handlePlayStep() {
           const pan = frequency > 200 ? getRandomArbitrary(-1, 1) : 0;
 
           // FM Synthesis
-          if (fm) {
+          if (options.fmOn) {
             modulatorOsc = audioContext.createOscillator();
             modulatorGainNode = audioContext.createGain();
-            modulatorOsc.frequency.value = frequency * modulatorBase;
-            modulatorGainNode.gain.value = modulatorDepth;
+            modulatorOsc.frequency.value = frequency * options.fmBase;
+            modulatorGainNode.gain.value = options.fmDepth;
             modulatorOsc.connect(modulatorGainNode);
             modulatorGainNode.connect(osc.frequency);
           }
@@ -315,13 +340,13 @@ function handlePlayStep() {
             decay * 5 +
             release * 5;
 
-          if (fm) {
+          if (options.fmOn) {
             modulatorOsc.start(now);
           }
           osc.start(now);
 
           // numberOfOsc += 1;
-          if (fm) {
+          if (options.fmOn) {
             // console.log(modulatorOsc.frequency.value, osc.frequency.value);
 
             modulatorOsc.stop(now + stopTime);
@@ -483,7 +508,7 @@ export {
   getSampleRate,
   clock,
   schedule,
-  handlePlayStep,
+  onPlayStep,
   reSchedule,
   getSchedule,
   getIsPlaying,
@@ -494,7 +519,7 @@ export {
   onPause,
   unsupported,
   loadAudioData,
-  fm,
   setOptions,
   getOptions,
+  resetOptions,
 };

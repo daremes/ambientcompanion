@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Slider from '@material-ui/core/Slider';
 //
-export default function InputSlider({ method, opts, target, min, max, step }) {
+export default function InputSlider({
+  method,
+  opts,
+  target,
+  min,
+  max,
+  step,
+  disabled,
+}) {
   const [value, setValue] = useState(opts[target]);
 
   const handleChange = (event, newValue) => {
@@ -10,6 +18,10 @@ export default function InputSlider({ method, opts, target, min, max, step }) {
       method(newValue, target);
     }
   };
+
+  useEffect(() => {
+    setValue(opts[target]);
+  }, [opts, target]);
 
   return (
     <div
@@ -27,6 +39,7 @@ export default function InputSlider({ method, opts, target, min, max, step }) {
         min={min}
         max={max}
         step={step ? step : 1}
+        disabled={disabled}
       />
     </div>
   );
