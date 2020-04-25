@@ -316,7 +316,17 @@ function onPlayStep() {
             count
           ].instrument;
           const { attack, decay, sustain, release } = envelope;
-          const dynamics = (Math.random() * 50 * volume) / 100;
+
+          let dynamics = 0;
+          const oT = schedule.synths[count].instrument.oscType;
+          if (oT === 'sine') {
+            dynamics = (Math.random() * 40 * volume) / 100;
+          } else if (oT === 'square') {
+            dynamics = 0.8 * volume;
+          } else {
+            dynamics = 0.5 * volume;
+          }
+
           let humanize = count * 0.02;
           const now = audioContext.currentTime + humanize;
           const sustainLevel = ((volume - dynamics) * sustain) / 100;
