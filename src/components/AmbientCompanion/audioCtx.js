@@ -163,7 +163,7 @@ function onResume() {
   reverbNode.connect(masterGainNode);
   dryGain.connect(masterGainNode);
   const analyser = audioContext.createAnalyser();
-  analyser.fftSize = 2048;
+  analyser.fftSize = 1024;
 
   masterGainNode.connect(analyser);
 
@@ -385,11 +385,11 @@ function initializeAnalyzer(analyser) {
   let startTime = null;
   let mover = step % stepCount;
   let transition;
-  console.log(defaultTheme);
-  const playingColor = `#f50057`;
-  const playingSampleColor = `#3fb5a3`;
-  const scheduledColor = `#3f51b5`;
-  const playedColor = '#ccc';
+  const { primary, secondary, additional1 } = defaultTheme.palette;
+  const playingColor = secondary.main;
+  const playingSampleColor = additional1.main;
+  const scheduledColor = primary.main;
+  const playedColor = '#999';
 
   function draw(timestamp) {
     if (!startTime) startTime = timestamp;

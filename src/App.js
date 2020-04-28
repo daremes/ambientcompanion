@@ -9,7 +9,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core/styles';
 import styled from 'styled-components';
-import './fonts.css';
 //
 import NavBar from './components/NavBar';
 import Home from './components/Home';
@@ -21,8 +20,8 @@ const theme = createMuiTheme(defaultTheme);
 function App() {
   return (
     <Router>
-      <CssBaseline />
       <ThemeProvider theme={theme}>
+        <CssBaseline />
         <NavBar />
         <DefaultLayout>
           <Route exact path='/'>

@@ -23,6 +23,7 @@ import ImgLoader from '../../images/loader.svg';
 import ICOplay from '../../images/play.svg';
 import ICOpause from '../../images/pause.svg';
 import TitleImg from '../../images/ambcomptitle.png';
+// import TitleImg from '../../images/ac-logo.png';
 
 export default function AmbientCompanion() {
   const [metro, setMetro] = useState(-1);
@@ -206,7 +207,7 @@ const Wrapper = styled.div`
 `;
 
 const TitleImage = styled.div`
-  width: 280px;
+  width: 240px;
   margin-bottom: 24px;
   img {
     max-width: 100%;
@@ -232,7 +233,7 @@ const TitleImage = styled.div`
 const Controls = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 48px;
 `;
 
 const BottomControls = styled.div`
@@ -246,7 +247,7 @@ const LoaderContainer = styled.div`
   justify-content: center;
   align-items: center;
   img {
-    max-height: 128px;
+    max-height: 160px;
   }
 `;
 
@@ -265,7 +266,7 @@ const Canvas = styled.canvas`
 
 const CanvasStepper = styled.canvas`
   width: 90%;
-  height: 95px;
+  height: 75px;
   /* box-shadow: 0px 0px 5px 0px rgba(214, 214, 214, 1); */
   border-radius: 5px;
 `;

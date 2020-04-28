@@ -1,3 +1,6 @@
+const primaryFont = `'Raleway', sans-serif;`;
+// const secondaryFont = `'Roboto Slab', serif;`;
+
 export default {
   palette: {
     primary: {
@@ -15,5 +18,8 @@ export default {
     additional3: {
       main: '#eae2b7',
     },
+  },
+  typography: {
+    fontFamily: primaryFont,
   },
 };
