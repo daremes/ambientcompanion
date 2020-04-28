@@ -14,8 +14,9 @@ import './fonts.css';
 import NavBar from './components/NavBar';
 import Home from './components/Home';
 import AmbientCompanion from './components/AmbientCompanion';
+import defaultTheme from './defaultTheme';
 
-const theme = createMuiTheme({});
+const theme = createMuiTheme(defaultTheme);
 
 function App() {
   return (

@@ -4,6 +4,7 @@ import defaultSchedule, {
   getRandomInt,
 } from './defaultSchedule';
 import soundFiles from './soundFiles';
+import defaultTheme from '../../defaultTheme';
 
 let irSources = [];
 let sampleSources = [];
@@ -384,11 +385,11 @@ function initializeAnalyzer(analyser) {
   let startTime = null;
   let mover = step % stepCount;
   let transition;
-
+  console.log(defaultTheme);
   const playingColor = `#f50057`;
   const playingSampleColor = `#3fb5a3`;
   const scheduledColor = `#3f51b5`;
-  const playedColor = `rgb(0, 0, 0, ${0.3})`;
+  const playedColor = '#ccc';
 
   function draw(timestamp) {
     if (!startTime) startTime = timestamp;
@@ -446,8 +447,7 @@ function initializeAnalyzer(analyser) {
     oCanvasCtx.lineTo(oCanvas.width, oCanvas.height / 2);
     oCanvasCtx.stroke();
 
-    sCanvasCtx.fillStyle = 'rgb(0, 0, 0, 0.2)';
-    sCanvasCtx.textAlign = 'center';
+    sCanvasCtx.fillStyle = '#ccc';
     for (let l = 0; l < schedule.patternLength; l += 1) {
       for (let i = 0; i < schedule.synths.length; i += 1) {
         if (schedule.synths[i].pattern[l].on) {
@@ -466,7 +466,7 @@ function initializeAnalyzer(analyser) {
           );
         }
       }
-      for (let i = 0; i < schedule.samples.length; i += 1) {
+      for (let i = 0; i < 2; i += 1) {
         if (schedule.samples[i].pattern[l].on) {
           if (l === (step % stepCount) - 1) {
             sCanvasCtx.fillStyle = playingColor;

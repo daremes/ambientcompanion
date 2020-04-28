@@ -11,18 +11,18 @@ export function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-const scale = ['d', 'e', 'f', 'g', 'a', 'a#', 'c'];
+const scale = ['d', 'e', 'f', 'g', 'a', 'a#', 'c', 'd', 'a'];
 
 function getRandomTone(octaveMin, octaveMax) {
   const octave = getRandomInt(
     octaveMin ? octaveMin : 1,
     octaveMax ? octaveMax : 6
   );
-  const chooseNote = `${scale[getRandomInt(0, 7)]}${octave}`;
+  const chooseNote = `${scale[getRandomInt(0, 9)]}${octave}`;
   return note(chooseNote).freq;
 }
 
-export function getPattern(patternLength, probability) {
+export function getPattern(patternLength) {
   const arr = [];
   for (let i = 0; i < patternLength; i += 1) {
     const newStep = {
@@ -121,7 +121,7 @@ export function generateSchedule(
           name: '808 Kick',
           description: '',
           type: 'BD',
-          volume: 0.6,
+          volume: 0.5,
           reverb: 0.1,
           pitchShiftLimit: 0,
           muted: 0,
