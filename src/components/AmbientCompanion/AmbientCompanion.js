@@ -4,6 +4,7 @@ import Button from '@material-ui/core/Button';
 import SettingsIcon from '@material-ui/icons/SettingsInputComponent';
 import SettingsMenu from './SettingsMenu';
 import Intro from './Intro';
+import Tutorial from './Tutorial';
 import {
   reSchedule,
   handleSequencerSwitch,
@@ -28,6 +29,9 @@ import TitleImg from '../../images/ambcomptitle.png';
 export default function AmbientCompanion() {
   const [metro, setMetro] = useState(-1);
   // const [masterGainNode, setMasterGainNode] = useState(getMasterGainNode());
+  const [isIntroRead, setIntroRead] = useState(
+    localStorage.getItem('isIntroRead') || ''
+  );
   const [masterGain, setMasterGain] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [intro, setIntro] = useState(true);
@@ -51,6 +55,10 @@ export default function AmbientCompanion() {
     setStepCount(newPatternLength);
     setMetro(-1);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('isIntroRead', isIntroRead);
+  }, [isIntroRead]);
 
   useEffect(() => {
     loadAudioData().then(loadingErrors => {
@@ -122,6 +130,10 @@ export default function AmbientCompanion() {
     setOpts(resetOptions());
   }
 
+  function handleCloseTutorial() {
+    setIntroRead('true');
+  }
+
   return (
     <Wrapper>
       {/* <Header>AmbientCompanion</Header>
@@ -131,6 +143,9 @@ export default function AmbientCompanion() {
       </TitleImage>
       {loaded ? (
         <>
+          {isIntroRead !== 'true' ? (
+            <Tutorial onClose={handleCloseTutorial} />
+          ) : null}
           <Controls>
             <Button
               variant={!isPlaying ? 'contained' : 'text'}
@@ -167,6 +182,7 @@ export default function AmbientCompanion() {
               handleChangeOptions={handleChangeOptions}
               handleResetOptions={handleResetOptions}
               opts={opts}
+              onInfo={setIntroRead}
             />
           ) : null}
           <VisualContent>
@@ -204,6 +220,7 @@ const Wrapper = styled.div`
   max-width: 480px;
   box-shadow: 0px 0px 5px 2px rgba(214, 214, 214, 1);
   padding: 24px;
+  position: relative;
 `;
 
 const TitleImage = styled.div`

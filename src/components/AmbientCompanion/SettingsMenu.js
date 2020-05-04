@@ -7,6 +7,7 @@ import InputSlider from './InputSlider';
 
 export default function SettingsMenu({
   onClose,
+  onInfo,
   masterGain,
   setMasterGain,
   handleChangeOptions,
@@ -75,9 +76,20 @@ export default function SettingsMenu({
           disabled={!opts.fmOn}
         />
       </Control>
+      <Info>
+        <Button
+          onClick={() => {
+            onClose();
+            onInfo('false');
+          }}
+        >
+          Info
+        </Button>
+      </Info>
     </Wrapper>
   );
 }
+
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -88,6 +100,11 @@ const Control = styled.div`
   flex-direction: column;
   width: 100%;
   margin-bottom: 12px;
+`;
+
+const Info = styled.div`
+  display: flex;
+  justify-content: center;
 `;
 
 const ButtonRow = styled.div`
