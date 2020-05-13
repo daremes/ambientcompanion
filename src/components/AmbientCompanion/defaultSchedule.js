@@ -275,14 +275,14 @@ export function generateSchedule(
           name: 'FX 2',
           description: '',
           type: 'FX',
-          volume: 0.5,
+          volume: 1,
           reverb: 0.6,
           pitchShiftLimit: 0,
           muted: 0,
         },
         pattern: getSamplesPattern(patternLength, {
           mode: 'random',
-          factor: 1,
+          factor: 5,
         }),
       },
       {
@@ -308,4 +308,5 @@ export function generateSchedule(
 
 const defaultSchedule = generateSchedule();
 
+export { scale };
 export default defaultSchedule;

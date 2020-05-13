@@ -40,6 +40,7 @@ export default function AmbientCompanion() {
   const [infinite, setInfinite] = useState(true);
   const [settingsOpened, setSettingsOpened] = useState(false);
   const [opts, setOpts] = useState(getOptions());
+  const [keyboardOn, setKeyboardOn] = useState(false);
   // const [sr, setSr] = useState(getSampleRate());
   const [loaded, setLoaded] = useState(false);
   // const [err, setErr] = useState(false);
@@ -135,6 +136,11 @@ export default function AmbientCompanion() {
     setIntroRead('true');
   }
 
+  function handleKeyboard() {
+    setKeyboardOn(!keyboardOn);
+    handleChangeOptions(!keyboardOn, 'mute');
+  }
+
   return (
     <Wrapper>
       {/* <Header>AmbientCompanion</Header>
@@ -187,7 +193,7 @@ export default function AmbientCompanion() {
             />
           ) : null}
           <VisualContent>
-            {isPlaying ? <Keyboard /> : null}
+            {keyboardOn ? <Keyboard /> : null}
             <CanvasWrapper>
               <CanvasStepper id='stepper' />
             </CanvasWrapper>
@@ -203,6 +209,14 @@ export default function AmbientCompanion() {
               onClick={() => setInfinite(prev => !prev)}
             >
               {infinite ? 'INFINITE GENERATOR ON' : 'LOOP PATTERN ON'}
+            </Button>
+            <Button
+              variant='text'
+              color='default'
+              disabled={!isPlaying}
+              onClick={() => handleKeyboard()}
+            >
+              {keyboardOn ? 'JAM MODE ON' : 'JAM MODE OFF'}
             </Button>
           </BottomControls>
         </>
@@ -258,6 +272,7 @@ const Controls = styled.div`
 const BottomControls = styled.div`
   display: flex;
   justify-content: center;
+  flex-direction: column;
 `;
 
 const LoaderContainer = styled.div`

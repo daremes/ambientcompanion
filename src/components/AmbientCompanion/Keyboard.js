@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { createKeyboard } from './audioCtx';
 //
@@ -7,16 +7,18 @@ let toneNumber = 0;
 let toneOctave = 0;
 
 export default function Keyboard() {
+  const element = useRef(null);
+
   useEffect(() => {
-    const element = document.getElementById('keyboard');
-    const elWidth = element.offsetWidth;
-    const elHeight = element.offsetHeight;
+    // const element = document.getElementById('keyboard');
+    const el = element.current;
+    const elWidth = el.offsetWidth;
+    const elHeight = el.offsetHeight;
     const keyboard = createKeyboard();
     let isPlaying = false;
     let currentNote = null;
 
     function onMouseDown(e) {
-      e.preventDefault();
       if (!isPlaying) {
         const xPosition = e.offsetX;
         const yPosition = e.offsetY;
@@ -26,8 +28,8 @@ export default function Keyboard() {
           );
         };
         isPlaying = true;
-        const numberOfTones = 7;
-        const numberOfOctaves = 6;
+        const numberOfTones = 5;
+        const numberOfOctaves = 5;
         toneNumber = Math.round(remap(xPosition, 0, elWidth, 0, numberOfTones));
         toneOctave = Math.round(
           remap(yPosition, 0, elHeight, numberOfOctaves, 0)
@@ -36,30 +38,36 @@ export default function Keyboard() {
         fx.className = 'fx';
         fx.style.left = `${xPosition - 14}px`;
         fx.style.top = `${yPosition - 14}px`;
-        element.appendChild(fx);
+        el.appendChild(fx);
         currentNote = keyboard.playNote(toneNumber, toneOctave);
       }
     }
     function onMouseUp(e) {
-      e.preventDefault();
       //   var xPosition = e.offsetX;
       //   var yPosition = e.offsetY;
       if (isPlaying) {
-        keyboard.releaseNote(currentNote);
+        keyboard.releaseNote(currentNote.osc, currentNote.gainNode);
         fx.remove();
         isPlaying = false;
       }
     }
-
-    element.addEventListener('mousedown', onMouseDown);
-    element.addEventListener('mouseup', onMouseUp);
-    element.addEventListener('mouseleave', onMouseUp);
-    element.addEventListener('touchstart', onMouseDown);
-    element.addEventListener('touchend', onMouseUp);
-    element.addEventListener('touchmove', onMouseUp);
+    el.addEventListener('touchstart', onMouseDown, { passive: true });
+    el.addEventListener('touchend', onMouseUp, { passive: true });
+    el.addEventListener('touchmove', onMouseUp, { passive: true });
+    el.addEventListener('mousedown', onMouseDown, { passive: true });
+    el.addEventListener('mouseup', onMouseUp, { passive: true });
+    el.addEventListener('mouseleave', onMouseUp, { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onMouseDown);
+      el.removeEventListener('touchend', onMouseUp);
+      el.removeEventListener('touchmove', onMouseUp);
+      el.removeEventListener('mousedown', onMouseDown);
+      el.removeEventListener('mouseup', onMouseUp);
+      el.removeEventListener('mouseleave', onMouseUp);
+    };
   }, []);
 
-  return <Pad id='keyboard' />;
+  return <Pad ref={element} />;
 }
 
 const Pad = styled.div`
