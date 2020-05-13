@@ -138,7 +138,8 @@ export default function AmbientCompanion() {
 
   function handleKeyboard() {
     setKeyboardOn(!keyboardOn);
-    handleChangeOptions(!keyboardOn, 'mute');
+    setOpts({ ...opts, mute: !keyboardOn, samplesOn: !!keyboardOn });
+    setOptions({ ...opts, mute: !keyboardOn, samplesOn: !!keyboardOn });
   }
 
   return (
