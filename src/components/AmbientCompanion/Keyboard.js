@@ -16,28 +16,32 @@ export default function Keyboard() {
     let currentNote = null;
 
     function onMouseDown(e) {
-      const xPosition = e.offsetX;
-      const yPosition = e.offsetY;
-      const remap = function(value, istart, istop, ostart, ostop) {
-        return (
-          ostart + (ostop - ostart) * ((value - istart) / (istop - istart))
+      e.preventDefault();
+      if (!isPlaying) {
+        const xPosition = e.offsetX;
+        const yPosition = e.offsetY;
+        const remap = function(value, istart, istop, ostart, ostop) {
+          return (
+            ostart + (ostop - ostart) * ((value - istart) / (istop - istart))
+          );
+        };
+        isPlaying = true;
+        const numberOfTones = 7;
+        const numberOfOctaves = 6;
+        toneNumber = Math.round(remap(xPosition, 0, elWidth, 0, numberOfTones));
+        toneOctave = Math.round(
+          remap(yPosition, 0, elHeight, numberOfOctaves, 0)
         );
-      };
-      isPlaying = true;
-      const numberOfTones = 7;
-      const numberOfOctaves = 6;
-      toneNumber = Math.round(remap(xPosition, 0, elWidth, 0, numberOfTones));
-      toneOctave = Math.round(
-        remap(yPosition, 0, elHeight, numberOfOctaves, 0)
-      );
-      fx = document.createElement('DIV');
-      fx.className = 'fx';
-      fx.style.left = `${xPosition - 14}px`;
-      fx.style.top = `${yPosition - 14}px`;
-      element.appendChild(fx);
-      currentNote = keyboard.playNote(toneNumber, toneOctave);
+        fx = document.createElement('DIV');
+        fx.className = 'fx';
+        fx.style.left = `${xPosition - 14}px`;
+        fx.style.top = `${yPosition - 14}px`;
+        element.appendChild(fx);
+        currentNote = keyboard.playNote(toneNumber, toneOctave);
+      }
     }
     function onMouseUp(e) {
+      e.preventDefault();
       //   var xPosition = e.offsetX;
       //   var yPosition = e.offsetY;
       if (isPlaying) {
