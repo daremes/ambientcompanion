@@ -8,12 +8,55 @@ let toneOctave = 0;
 
 export default function Keyboard() {
   const element = useRef(null);
+  const [keyboardSize, setKeyboardSize] = useState({ x: 0, y: 0 });
+
+  const createMatrix = () => {
+    let matrix = [];
+    const xOffset = keyboardSize.x / 6;
+    const yOffset = keyboardSize.y / 6;
+
+    for (let i = 1; i < 7; i++) {
+      matrix.push(
+        <div
+          key={`horizontal-${i}`}
+          style={{
+            position: 'absolute',
+            height: '1px',
+            border: '1px solid rgba(0,0,0,0.1)',
+            width: '100%',
+            top: `${i * yOffset}px`,
+            zIndex: '-1',
+            pointerEvents: 'none',
+          }}
+        />
+      );
+    }
+    for (let j = 1; j < 7; j += 1) {
+      matrix.push(
+        <div
+          key={`vertical-${j}`}
+          style={{
+            position: 'absolute',
+            height: '100%',
+            border: '1px solid rgba(0,0,0,0.1)',
+            width: '1px',
+            left: `${j * xOffset}px`,
+            zIndex: '-1',
+            pointerEvents: 'none',
+          }}
+        />
+      );
+    }
+
+    return matrix;
+  };
 
   useEffect(() => {
     // const element = document.getElementById('keyboard');
     const el = element.current;
     const elWidth = el.offsetWidth;
     const elHeight = el.offsetHeight;
+    setKeyboardSize({ x: elWidth, y: elHeight });
     const keyboard = createKeyboard();
     let isPlaying = false;
     let currentNote = null;
@@ -35,12 +78,14 @@ export default function Keyboard() {
           );
         };
         isPlaying = true;
-        const numberOfTones = 5;
-        const numberOfOctaves = 5;
-        toneNumber = Math.round(remap(xPosition, 0, elWidth, 0, numberOfTones));
-        toneOctave = Math.round(
+        const numberOfTones = 6;
+        const numberOfOctaves = 6;
+        toneNumber = Math.floor(remap(xPosition, 0, elWidth, 0, numberOfTones));
+        toneOctave = Math.floor(
           remap(yPosition, 0, elHeight, numberOfOctaves, 0)
         );
+        console.log(toneOctave);
+
         fx = document.createElement('DIV');
         fx.className = 'fx';
         fx.style.left = `${xPosition - 14}px`;
@@ -76,7 +121,7 @@ export default function Keyboard() {
     };
   }, []);
 
-  return <Pad ref={element} />;
+  return <Pad ref={element}>{createMatrix()}</Pad>;
 }
 
 const Pad = styled.div`
