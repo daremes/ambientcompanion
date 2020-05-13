@@ -81,6 +81,39 @@ function getSchedule() {
   return schedule;
 }
 
+const createKeyboard = () => {
+  console.log('keyboar created');
+  const gainNode = audioContext.createGain();
+  gainNode.gain.value = 0.3;
+  if (options.filterOn) {
+    gainNode.connect(filterNode);
+    filterNode.connect(dryGain);
+    filterNode.connect(wetGain);
+  } else {
+    gainNode.connect(dryGain);
+    gainNode.connect(wetGain);
+  }
+
+  function playNote(toneNumber, toneOctave) {
+    console.log(toneNumber, toneOctave);
+    const osc = audioContext.createOscillator();
+    osc.connect(gainNode);
+    osc.start();
+    return osc;
+  }
+
+  function releaseNote(currentNote) {
+    currentNote.stop();
+    console.log('releaseNote');
+  }
+
+  function destroy() {
+    console.log('destroyed');
+  }
+
+  return { playNote, releaseNote };
+};
+
 async function getFile(ctx, filepath) {
   const response = await fetch(filepath);
   const arrayBuffer = await response.arrayBuffer();
@@ -532,4 +565,5 @@ export {
   setOptions,
   getOptions,
   resetOptions,
+  createKeyboard,
 };

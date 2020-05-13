@@ -19,6 +19,7 @@ import {
 } from './audioCtx';
 import changeNodeVolume from './changeNodeVolume';
 import { generateSchedule, getRandomInt } from './defaultSchedule';
+import Keyboard from './Keyboard';
 import ImgLoader from '../../images/loader.svg';
 // import useAnimationFrame from '../useAnimationFrame';
 import ICOplay from '../../images/play.svg';
@@ -186,6 +187,7 @@ export default function AmbientCompanion() {
             />
           ) : null}
           <VisualContent>
+            {isPlaying ? <Keyboard /> : null}
             <CanvasWrapper>
               <CanvasStepper id='stepper' />
             </CanvasWrapper>
@@ -269,6 +271,7 @@ const LoaderContainer = styled.div`
 `;
 
 const VisualContent = styled.div`
+  padding: 16px 0;
   position: relative;
   display: block;
   width: 100%;
