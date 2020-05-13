@@ -17,11 +17,19 @@ export default function Keyboard() {
     const keyboard = createKeyboard();
     let isPlaying = false;
     let currentNote = null;
+    const rect = el.getBoundingClientRect();
 
     function onMouseDown(e) {
+      e.preventDefault();
       if (!isPlaying) {
-        const xPosition = e.offsetX;
-        const yPosition = e.offsetY;
+        const xPosition = e.touches
+          ? e.touches[0].clientX - rect.left
+          : e.offsetX;
+        const yPosition = e.touches
+          ? e.touches[0].clientY - rect.top
+          : e.offsetY;
+
+        console.log(xPosition, yPosition);
         const remap = function(value, istart, istop, ostart, ostop) {
           return (
             ostart + (ostop - ostart) * ((value - istart) / (istop - istart))
@@ -43,6 +51,8 @@ export default function Keyboard() {
       }
     }
     function onMouseUp(e) {
+      e.preventDefault();
+
       //   var xPosition = e.offsetX;
       //   var yPosition = e.offsetY;
       if (isPlaying) {
@@ -51,12 +61,12 @@ export default function Keyboard() {
         isPlaying = false;
       }
     }
-    el.addEventListener('touchstart', onMouseDown, { passive: true });
-    el.addEventListener('touchend', onMouseUp, { passive: true });
-    el.addEventListener('touchmove', onMouseUp, { passive: true });
-    el.addEventListener('mousedown', onMouseDown, { passive: true });
-    el.addEventListener('mouseup', onMouseUp, { passive: true });
-    el.addEventListener('mouseleave', onMouseUp, { passive: true });
+    el.addEventListener('touchstart', onMouseDown);
+    el.addEventListener('touchend', onMouseUp);
+    el.addEventListener('touchmove', onMouseUp);
+    el.addEventListener('mousedown', onMouseDown);
+    el.addEventListener('mouseup', onMouseUp);
+    el.addEventListener('mouseleave', onMouseUp);
     return () => {
       el.removeEventListener('touchstart', onMouseDown);
       el.removeEventListener('touchend', onMouseUp);
