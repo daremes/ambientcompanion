@@ -188,8 +188,11 @@ export default function AmbientCompanion() {
               setMasterGain={setMasterGain}
               handleChangeOptions={handleChangeOptions}
               handleResetOptions={handleResetOptions}
+              handleKeyboard={handleKeyboard}
+              keyboardOn={keyboardOn}
               opts={opts}
               onInfo={setIntroRead}
+              isPlaying={isPlaying}
             />
           ) : null}
           <VisualContent>
@@ -209,14 +212,6 @@ export default function AmbientCompanion() {
               onClick={() => setInfinite(prev => !prev)}
             >
               {infinite ? 'INFINITE GENERATOR ON' : 'LOOP PATTERN ON'}
-            </Button>
-            <Button
-              variant='text'
-              color='default'
-              disabled={!isPlaying}
-              onClick={() => handleKeyboard()}
-            >
-              {keyboardOn ? 'JAM MODE ON' : 'JAM MODE OFF'}
             </Button>
           </BottomControls>
         </>

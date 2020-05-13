@@ -29,7 +29,6 @@ export default function Keyboard() {
           ? e.touches[0].clientY - rect.top
           : e.offsetY;
 
-        console.log(xPosition, yPosition);
         const remap = function(value, istart, istop, ostart, ostop) {
           return (
             ostart + (ostop - ostart) * ((value - istart) / (istop - istart))

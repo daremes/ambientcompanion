@@ -13,6 +13,9 @@ export default function SettingsMenu({
   handleChangeOptions,
   handleResetOptions,
   opts,
+  isPlaying,
+  handleKeyboard,
+  keyboardOn,
 }) {
   return (
     <Wrapper>
@@ -78,6 +81,14 @@ export default function SettingsMenu({
       </Control>
       <Info>
         <Button
+          variant='text'
+          color={keyboardOn ? 'secondary' : 'default'}
+          disabled={!isPlaying}
+          onClick={handleKeyboard}
+        >
+          {keyboardOn ? 'SOLO ON!' : 'SOLO OFF'}
+        </Button>
+        <Button
           onClick={() => {
             onClose();
             onInfo('false');
@@ -104,7 +115,7 @@ const Control = styled.div`
 
 const Info = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
 `;
 
 const ButtonRow = styled.div`
