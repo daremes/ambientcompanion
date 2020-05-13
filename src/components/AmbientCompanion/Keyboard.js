@@ -50,6 +50,9 @@ export default function Keyboard() {
     element.addEventListener('mousedown', onMouseDown);
     element.addEventListener('mouseup', onMouseUp);
     element.addEventListener('mouseleave', onMouseUp);
+    element.addEventListener('touchstart', onMouseDown);
+    element.addEventListener('touchend', onMouseUp);
+    element.addEventListener('touchmove', onMouseUp);
   }, []);
 
   return <Pad id='keyboard' />;
