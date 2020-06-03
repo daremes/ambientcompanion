@@ -87,7 +87,6 @@ export default function Keyboard({ createKeyboard }) {
         toneOctave = Math.floor(
           remap(yPosition, 0, elHeight, numberOfOctaves, 0)
         );
-        console.log(toneOctave);
 
         fx = document.createElement('DIV');
         fx.className = 'fx';
@@ -122,7 +121,7 @@ export default function Keyboard({ createKeyboard }) {
       el.removeEventListener('mouseup', onMouseUp);
       el.removeEventListener('mouseleave', onMouseUp);
     };
-  }, []);
+  }, [createKeyboard]);
 
   return <Pad ref={element}>{createMatrix()}</Pad>;
 }
