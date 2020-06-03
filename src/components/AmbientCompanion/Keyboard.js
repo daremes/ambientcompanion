@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { createKeyboard } from './audioCtx';
+// import { createKeyboard } from './audioCtx';
 //
 let fx = null;
 let toneNumber = 0;
 let toneOctave = 0;
 
-export default function Keyboard() {
+export default function Keyboard({ createKeyboard }) {
   const element = useRef(null);
-  const [keyboardSize, setKeyboardSize] = useState({ x: 0, y: 0 });
+  const [keyboardSize, setKeyboardSize] = useState({
+    x: 0,
+    y: 0,
+  });
 
   const createMatrix = () => {
     let matrix = [];

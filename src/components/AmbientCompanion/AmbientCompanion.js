@@ -1,22 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
 import SettingsIcon from '@material-ui/icons/SettingsInputComponent';
 import SettingsMenu from './SettingsMenu';
 import Intro from './Intro';
 import Tutorial from './Tutorial';
-import {
-  reSchedule,
-  handleSequencerSwitch,
-  getMasterGainNode,
-  getStepCount,
-  getAudioContext,
-  onPause,
-  loadAudioData,
-  getOptions,
-  setOptions,
-  resetOptions,
-} from './audioCtx';
+import createAudioEngine from './audioCtx';
 import changeNodeVolume from './changeNodeVolume';
 import { generateSchedule, getRandomInt } from './defaultSchedule';
 import Keyboard from './Keyboard';
@@ -26,8 +15,11 @@ import ICOplay from '../../images/play.svg';
 import ICOpause from '../../images/pause.svg';
 import TitleImg from '../../images/ambcomptitle.png';
 // import TitleImg from '../../images/ac-logo.png';
+// const ae = createAudioEngine();
+let ae = undefined;
 
 export default function AmbientCompanion() {
+  ae = !ae ? createAudioEngine() : ae;
   const [metro, setMetro] = useState(-1);
   // const [masterGainNode, setMasterGainNode] = useState(getMasterGainNode());
   const [isIntroRead, setIntroRead] = useState(
@@ -36,10 +28,10 @@ export default function AmbientCompanion() {
   const [masterGain, setMasterGain] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [intro, setIntro] = useState(true);
-  const [stepCount, setStepCount] = useState(getStepCount());
+  const [stepCount, setStepCount] = useState(ae.getStepCount());
   const [infinite, setInfinite] = useState(true);
   const [settingsOpened, setSettingsOpened] = useState(false);
-  const [opts, setOpts] = useState(getOptions());
+  const [opts, setOpts] = useState(ae.getOptions());
   const [keyboardOn, setKeyboardOn] = useState(false);
   // const [sr, setSr] = useState(getSampleRate());
   const [loaded, setLoaded] = useState(false);
@@ -52,7 +44,7 @@ export default function AmbientCompanion() {
       newPatternLength += 1;
     }
     const newSchedule = generateSchedule(newPatternLength);
-    reSchedule(newSchedule);
+    ae.reSchedule(newSchedule);
     // setSchedule(newSchedule);
     setStepCount(newPatternLength);
     setMetro(-1);
@@ -63,7 +55,7 @@ export default function AmbientCompanion() {
   }, [isIntroRead]);
 
   useEffect(() => {
-    loadAudioData().then(loadingErrors => {
+    ae.loadAudioData().then(loadingErrors => {
       if (loadingErrors.length === 0) {
         console.log('Audio data loaded!');
         setLoaded(true);
@@ -78,7 +70,7 @@ export default function AmbientCompanion() {
     });
     console.log('Audio data not yet loaded...');
     memoizedHandleReschedule();
-    function tick(metro) {
+    function tick() {
       setMetro(metro => metro + 1);
     }
     function onTrigger(e) {
@@ -89,12 +81,13 @@ export default function AmbientCompanion() {
     return () => {
       window.removeEventListener('trigger', onTrigger);
       // const ctx = getAudioContext();
-      onPause();
+      ae.onPause();
+      ae = undefined;
     };
   }, [memoizedHandleReschedule]);
 
   useEffect(() => {
-    changeNodeVolume(getMasterGainNode(), getAudioContext(), masterGain);
+    changeNodeVolume(ae.getMasterGainNode(), ae.getAudioContext(), masterGain);
   }, [masterGain]);
 
   useEffect(() => {
@@ -105,7 +98,7 @@ export default function AmbientCompanion() {
 
   function switchPlay() {
     if (isPlaying === false) {
-      handleSequencerSwitch();
+      ae.handleSequencerSwitch();
       if (intro) {
         setIntro(false);
       }
@@ -113,7 +106,7 @@ export default function AmbientCompanion() {
       setIsPlaying(true);
     } else {
       memoizedHandleReschedule();
-      handleSequencerSwitch();
+      ae.handleSequencerSwitch();
       setIsPlaying(false);
       // setMetro(0);
     }
@@ -125,11 +118,12 @@ export default function AmbientCompanion() {
 
   function handleChangeOptions(value, what) {
     setOpts({ ...opts, [what]: value });
-    setOptions({ ...opts, [what]: value });
+    ae.setOptions({ ...opts, [what]: value });
   }
 
   function handleResetOptions() {
-    setOpts(resetOptions());
+    setOpts(ae.resetOptions());
+    setKeyboardOn(false);
   }
 
   function handleCloseTutorial() {
@@ -139,7 +133,7 @@ export default function AmbientCompanion() {
   function handleKeyboard() {
     setKeyboardOn(!keyboardOn);
     setOpts({ ...opts, mute: !keyboardOn, samplesOn: !!keyboardOn });
-    setOptions({ ...opts, mute: !keyboardOn, samplesOn: !!keyboardOn });
+    ae.setOptions({ ...opts, mute: !keyboardOn, samplesOn: !!keyboardOn });
   }
 
   return (
@@ -197,7 +191,9 @@ export default function AmbientCompanion() {
             />
           ) : null}
           <VisualContent>
-            {keyboardOn ? <Keyboard /> : null}
+            {keyboardOn ? (
+              <Keyboard createKeyboard={ae.createKeyboard} />
+            ) : null}
             <CanvasWrapper>
               <CanvasStepper id='stepper' />
             </CanvasWrapper>
