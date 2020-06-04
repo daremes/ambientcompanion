@@ -4,30 +4,59 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import RightIcon from '@material-ui/icons/ArrowForward';
 import BackIcon from '@material-ui/icons/ArrowBack';
+import SettingsIcon from '@material-ui/icons/SettingsInputComponent';
 
 const Step1 = () => (
-  <div>
-    Meatball fatback shoulder kevin chislic swine pig, alcatra tail salami jowl
-    pork. Ribeye chicken picanha, pancetta biltong prosciutto pastrami
-    tenderloin meatball pork pork belly. Pancetta pastrami shank, corned beef
-    pork chop meatloaf short loin leberkas. Burgdoggen pig pancetta, pork
-    andouille spare ribs venison turkey flank turducken kielbasa tenderloin
-    shankle.
-  </div>
+  <Info>
+    <h1>Welcome to AmbientCompanion</h1>
+    <p>
+      Ok, so you're going to try this weird little app with a silly name. If you
+      don't mind, you can read a few lines explaining what the hell is this all
+      about. Otherwise, go ahead and close this window and I won't bother you
+      again.
+    </p>
+    <p>
+      You can always read the introduction later when you find out that you
+      actually care to do so. Just click the Info button in Advanced Audio
+      Settings <SettingsIcon />.
+    </p>
+  </Info>
 );
 
 const Step2 = () => (
-  <div>
-    Spicy jalapeno bacon ipsum dolor amet turkey ribeye filet mignon, pork
-    t-bone tri-tip frankfurter. Turducken chislic beef chuck rump. Cow beef
-    pastrami spare ribs. Swine boudin leberkas ham. Biltong pig strip steak
-    t-bone, meatloaf salami fatback tenderloin jerky turducken. Strip steak
-    spare ribs kevin, ribeye kielbasa short loin shank porchetta capicola.
-    Pancetta bresaola ham hock filet mignon.
-  </div>
+  <Info>
+    <h1>What is this?!</h1>
+    <p>
+      AmbientCompanion is a part of collection of multimedia experiments
+      strongly biased towards sound and generative art.
+    </p>
+    <p>
+      It can be considered a proof-of-concept - or a tech demonstration if you
+      will - of sound synthesis and other audio capabilities of your web
+      browser.
+    </p>
+  </Info>
 );
 
-const stepComponents = [<Step1 />, <Step2 />];
+const Step3 = () => (
+  <Info>
+    <p>
+      That being said, AmbientCompanion is just a simple web application that
+      plays random (to some extent) patterns of synthesized and sampled sounds.
+    </p>
+    <p>
+      Hopefuly, someone who's into web technology, digital audio processing,
+      sound-design and other funny stuff like that can find it interesting.
+    </p>
+    <p>
+      And, of course, ladies and gentlemen who appreciate ambient and
+      experimental music are more than welcome. And others? You can be sure it
+      will put you to sleep in a few minutes!
+    </p>
+  </Info>
+);
+
+const stepComponents = [<Step1 />, <Step2 />, <Step3 />];
 
 export default function Tutorial({ onClose }) {
   const [step, setStep] = useState(0);
@@ -116,4 +145,16 @@ const Bottom = styled.div`
 
 const ButtonContainer = styled.div`
   width: 48px;
+`;
+
+const Info = styled.div`
+  h1 {
+    font-size: 18px;
+    font-family: 'Roboto Slab', serif;
+    /* font-family: 'Raleway', sans-serif; */
+  }
+  svg {
+    height: 16px;
+    vertical-align: middle;
+  }
 `;

@@ -1,5 +1,5 @@
 const primaryFont = `'Raleway', sans-serif;`;
-// const secondaryFont = `'Roboto Slab', serif;`;
+const secondaryFont = `'Roboto Slab', serif;`;
 
 export default {
   palette: {
