@@ -45,7 +45,7 @@ const Step3 = () => (
       plays random (to some extent) patterns of synthesized and sampled sounds.
     </p>
     <p>
-      Hopefuly, someone who's into web technology, digital audio processing,
+      Hopefully, someone who's into web technology, digital audio processing,
       sound-design and other funny stuff like that can find it interesting.
     </p>
     <p>
