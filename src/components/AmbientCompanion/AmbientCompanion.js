@@ -23,13 +23,13 @@ export default function AmbientCompanion() {
   const [metro, setMetro] = useState(-1);
   // const [masterGainNode, setMasterGainNode] = useState(getMasterGainNode());
   const [isIntroRead, setIntroRead] = useState(
-    localStorage.getItem('isIntroRead') || ''
+    localStorage.getItem('introRead') || ''
   );
-  const [masterGain, setMasterGain] = useState(1);
+  const [masterGain, setMasterGain] = useState(0.9);
   const [isPlaying, setIsPlaying] = useState(false);
   const [intro, setIntro] = useState(true);
   const [stepCount, setStepCount] = useState(ae.getStepCount());
-  const [infinite, setInfinite] = useState(true);
+  const [infinite, setInfinite] = useState(false);
   const [settingsOpened, setSettingsOpened] = useState(false);
   const [opts, setOpts] = useState(ae.getOptions());
   const [keyboardOn, setKeyboardOn] = useState(false);
@@ -39,7 +39,7 @@ export default function AmbientCompanion() {
   const [loadingMessage, setLoadingMessage] = useState('Loading audio stuff');
   // const [oscCount, setOscCount] = useState(0);
   const memoizedHandleReschedule = useCallback(() => {
-    let newPatternLength = getRandomInt(4, 64);
+    let newPatternLength = getRandomInt(8, 32);
     if (newPatternLength % 2 !== 0) {
       newPatternLength += 1;
     }
@@ -51,7 +51,7 @@ export default function AmbientCompanion() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('isIntroRead', isIntroRead);
+    localStorage.setItem('introRead', isIntroRead);
   }, [isIntroRead]);
 
   useEffect(() => {
@@ -204,11 +204,11 @@ export default function AmbientCompanion() {
           </VisualContent>
           <BottomControls>
             <Button
-              variant='text'
+              variant='outlined'
               color='default'
               onClick={() => setInfinite(prev => !prev)}
             >
-              {infinite ? 'INFINITE GENERATOR ON' : 'LOOP PATTERN ON'}
+              {infinite ? 'INFINITE GENERATOR' : 'LOOP PATTERN'}
             </Button>
           </BottomControls>
         </>

@@ -97,7 +97,7 @@ export function generateSchedule(
   lessBusyFactor
 ) {
   if (!patternLength) {
-    patternLength = 32;
+    patternLength = 16;
   }
   if (!tempo) {
     tempo = 124;

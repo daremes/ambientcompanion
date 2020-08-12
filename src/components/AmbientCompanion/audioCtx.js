@@ -39,7 +39,6 @@ export default function createAudioEngine() {
   let stepCount = defaultSchedule.patternLength;
   let tempo = defaultSchedule.tempo;
   let beatLengthInSeconds = 1 / (tempo / 60);
-  console.log(beatLengthInSeconds);
   let masterGainNode = undefined;
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   let audioContext = new AudioContext();
@@ -63,7 +62,6 @@ export default function createAudioEngine() {
     mute: false,
   };
   let options = { ...defaultOptions };
-  console.log(options);
   const requestAnimationFrame =
     window.requestAnimationFrame ||
     window.mozRequestAnimationFrame ||

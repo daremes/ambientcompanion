@@ -63,8 +63,8 @@ const Step4 = () => (
       AmbientCompanion uses WebAudio API and a popular Javascript library for
       building user interfaces called React. (Think of your Facebook, Instagram
       and many others). Also, it takes advantage of HTML Canvas to display
-      oscilloscope and other components. A part of UI is based on customized
-      Material UI.
+      oscilloscope and other components. UI controls are based on customized
+      Material UI. Boring.
     </p>
     <p>
       It will run on your kick-ass laptop using current browsers. I prefer
@@ -78,7 +78,18 @@ const Step4 = () => (
 const Step5 = () => (
   <Info>
     <h1>Audio mumbo-jumbo</h1>
-    <p>Fm Synthesis</p>
+    <p>
+      Fm Synthesis is short for frequency modulation synthesis. It allows to
+      generate pretty complex timbres by modulating the frequency of one
+      oscillator with another. You can try to switch FM synthesis on/off to hear
+      the difference between a simple sine/triangle wave and a modulated one. I
+      recommend to take a look at the Solo Mode in the Settings where you can
+      experiment with FM synthesis a little further.
+    </p>
+    <p>
+      Does it sound a bit echoey? It's a convolution reverb using a custom
+      impulse response.
+    </p>
   </Info>
 );
 
