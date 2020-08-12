@@ -27,12 +27,12 @@ const Step2 = () => (
   <Info>
     <h1>What is this?!</h1>
     <p>
-      AmbientCompanion is a part of collection of multimedia experiments
+      AmbientCompanion is a part of my collection of multimedia experiments
       strongly biased towards sound and generative art.
     </p>
     <p>
-      It can be considered a proof-of-concept - or a tech demonstration if you
-      will - of sound synthesis and other audio capabilities of your web
+      This one can be considered a proof-of-concept - or a tech demonstration if
+      you will - of sound synthesis and other audio capabilities of your web
       browser.
     </p>
   </Info>
@@ -56,7 +56,33 @@ const Step3 = () => (
   </Info>
 );
 
-const stepComponents = [<Step1 />, <Step2 />, <Step3 />];
+const Step4 = () => (
+  <Info>
+    <h1>Tech gibberish</h1>
+    <p>
+      AmbientCompanion uses WebAudio API and a popular Javascript library for
+      building user interfaces called React. (Think of your Facebook, Instagram
+      and many others). Also, it takes advantage of HTML Canvas to display
+      oscilloscope and other components. A part of UI is based on customized
+      Material UI.
+    </p>
+    <p>
+      It will run on your kick-ass laptop using current browsers. I prefer
+      Chrome and Safari. It was tested on iOS devices and some Android phones.
+      Probably, it won't work in Internet Explorer. And that's a good thing,
+      grandpa!
+    </p>
+  </Info>
+);
+
+const Step5 = () => (
+  <Info>
+    <h1>Audio mumbo-jumbo</h1>
+    <p>Fm Synthesis</p>
+  </Info>
+);
+
+const stepComponents = [<Step1 />, <Step2 />, <Step3 />, <Step4 />, <Step5 />];
 
 export default function Tutorial({ onClose }) {
   const [step, setStep] = useState(0);
