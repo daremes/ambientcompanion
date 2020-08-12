@@ -1,6 +1,6 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
-import { ReactComponent as Logo } from '../../images/cat-knob.svg';
+import { ReactComponent as Logo } from '../../images/cat-noknob.svg';
 
 export default function Intro({ start }) {
   return (
@@ -33,8 +33,8 @@ const Wrapper = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  width: 120px;
-  height: 120px;
+  width: 160px;
+  height: 160px;
   img {
     max-width: 100%;
     max-height: 100%;
